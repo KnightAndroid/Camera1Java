@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.knight.cameraone.activity.MainActivity"
+    >
+
+
+
+
+    <LinearLayout
+        android:id="@+id/ll_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <Button
+            android:id="@+id/btn_system_camera"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="调用系统相机"/>
+
+        <Button
+            android:id="@+id/btn_system_photo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="调用系统相册"/>
+
+        <Button
+            android:id="@+id/btn_custom_camera"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="调用自定义相机"/>
+
+    </LinearLayout>
+
+
+    <ImageView
+        android:id="@+id/iv_photo"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_below="@id/ll_btn"
+        android:layout_centerHorizontal="true"/>
+
+
+
+
+
+
+</RelativeLayout>
