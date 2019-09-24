@@ -8,9 +8,6 @@
     tools:context="com.knight.cameraone.activity.MainActivity"
     >
 
-
-
-
     <LinearLayout
         android:id="@+id/ll_btn"
         android:layout_width="wrap_content"
@@ -46,9 +43,6 @@
         android:layout_height="150dp"
         android:layout_below="@id/ll_btn"
         android:layout_centerHorizontal="true"/>
-
-
-
 
 
 
