@@ -22,6 +22,22 @@
         >
 
 
+        <ImageView
+            android:id="@+id/iv_photo"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/default_person_icon"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            android:layout_marginLeft="10dp"
+            />
+
+
+
+
+
+
         <TextView
             android:id="@+id/tv_takephoto"
             android:layout_width="wrap_content"

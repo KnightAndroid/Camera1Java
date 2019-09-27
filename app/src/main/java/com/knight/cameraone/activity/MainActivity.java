@@ -33,6 +33,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button btn_system_camera;
     //调用系统相册
     private Button btn_system_photo;
+    //调用自定义相机
+    private Button btn_custom_camera;
     //调用系统拍照返回的uri
     private Uri uri;
     //拍照照片的路径
@@ -57,6 +59,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btn_system_camera = findViewById(R.id.btn_system_camera);
         iv_photo = findViewById(R.id.iv_photo);
         btn_system_photo = findViewById(R.id.btn_system_photo);
+        btn_custom_camera = findViewById(R.id.btn_custom_camera);
     }
 
 
@@ -68,6 +71,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void initListener(){
         btn_system_camera.setOnClickListener(this);
         btn_system_photo.setOnClickListener(this);
+        btn_custom_camera.setOnClickListener(this);
     }
 
     /**
@@ -130,11 +134,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
+            //跳转系统相机
             case R.id.btn_system_camera:
                 goSystemCamera();
                 break;
+            //跳转系统相册
             case R.id.btn_system_photo:
                 goSystemPhoto();
+                break;
+            case R.id.btn_custom_camera:
+                startActivity(new Intent(this,CustomCameraActivity.class));
                 break;
             default:
                 break;

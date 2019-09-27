@@ -1,15 +1,18 @@
 package com.knight.cameraone.activity;
 
+import android.graphics.RectF;
 import android.hardware.Camera;
-import android.hardware.Sensor;
-import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.knight.cameraone.CameraPresenter;
 import com.knight.cameraone.R;
+
+import java.util.ArrayList;
 
 
 /**
@@ -19,20 +22,16 @@ import com.knight.cameraone.R;
  * @descript:
  */
 
-public class CustomCameraActivity extends AppCompatActivity implements View.OnClickListener {
+public class CustomCameraActivity extends AppCompatActivity implements View.OnClickListener,CameraPresenter.CameraCallBack {
 
-    //Camera对象
-    private Camera mCamera;
-    //Camera设置参数对象
-    private Camera.Parameters mParameters;
-    //SurfaceHolder对象
-    private SurfaceHolder mSurfaceHolder;
-    //通过这个类创建传感器服务实例，可以访问传感器列表、获取方位信息
-    private SensorManager mSensorManager;
-    //创建传感器实例
-    private Sensor mSensor;
     //拍照
     private TextView tv_takephoto;
+    //逻辑层
+    private CameraPresenter mCameraPresenter;
+    //SurfaceView
+    private SurfaceView sf_camera;
+    //显示拍下来的图片
+    private ImageView iv_photo;
 
 
     @Override
@@ -41,6 +40,12 @@ public class CustomCameraActivity extends AppCompatActivity implements View.OnCl
         setContentView(R.layout.activity_customcamera);
         initBind();
         initListener();
+        //初始化CameraPresenter
+        mCameraPresenter = new CameraPresenter(this,sf_camera);
+        //设置后置摄像头
+        mCameraPresenter.setFrontOrBack(Camera.CameraInfo.CAMERA_FACING_BACK);
+        //添加监听
+        mCameraPresenter.setCameraCallBack(this);
     }
     @Override
     public void onClick(View v) {
@@ -58,6 +63,8 @@ public class CustomCameraActivity extends AppCompatActivity implements View.OnCl
      */
     private void initBind(){
         tv_takephoto = findViewById(R.id.tv_takephoto);
+        sf_camera = findViewById(R.id.sf_camera);
+        iv_photo = findViewById(R.id.iv_photo);
     }
 
 
@@ -71,27 +78,40 @@ public class CustomCameraActivity extends AppCompatActivity implements View.OnCl
 
 
     /**
-     * 初始化相机
-     *
+     * Activity 销毁回调方法 释放各种资源
      */
-    private void initCamera(){
-
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        if(mCameraPresenter != null){
+            mCameraPresenter.releaseCamera();
+        }
     }
-
 
     /**
-     * 初始化相机参数
+     * 预览回调
+     * @param data 预览数据
      */
-    private void initParameter() {
+    @Override
+    public void onPreviewFrame(byte[] data,Camera camera) {
 
     }
 
+    /**
+     * 拍照回调
+     * @param data 拍照数据
+     */
+    @Override
+    public void onTakePicture(byte[] data,Camera camera) {
 
+    }
 
+    /**
+     * 人脸检测回调
+     * @param rectFArrayList
+     */
+    @Override
+    public void onFaceDetect(ArrayList<RectF> rectFArrayList,Camera camera) {
 
-
-
-
-
-
+    }
 }

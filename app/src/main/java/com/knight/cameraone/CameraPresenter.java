@@ -38,8 +38,8 @@ public class CameraPresenter implements Camera.PreviewCallback {
     //SurfaceHolder对象
     private SurfaceHolder mSurfaceHolder;
 
-    //摄像头方向 默认前置
-    private int mCameraId = Camera.CameraInfo.CAMERA_FACING_FRONT;
+    //摄像头方向 默认后置
+    private int mCameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
     //预览旋转的角度
     private int orientation;
 
@@ -49,13 +49,13 @@ public class CameraPresenter implements Camera.PreviewCallback {
     private int screenWidth,screenHeight;
 
 
-    interface CameraCallBack{
+    public interface CameraCallBack{
         //第一帧
-        void onPreviewFrame(byte[] data);
+        void onPreviewFrame(byte[] data,Camera camera);
         //拍照回调
-        void onTakePicture(byte[] data);
+        void onTakePicture(byte[] data,Camera Camera);
         //人脸检测回调
-        void onFaceDetect(ArrayList<RectF> rectFArrayList);
+        void onFaceDetect(ArrayList<RectF> rectFArrayList,Camera camera);
     }
 
     public void setCameraCallBack(CameraCallBack mCameraCallBack){
@@ -69,6 +69,7 @@ public class CameraPresenter implements Camera.PreviewCallback {
         mSurfaceHolder = mSurfaceView.getHolder();
         DisplayMetrics dm = new DisplayMetrics();
         mAppCompatActivity.getWindowManager().getDefaultDisplay().getMetrics(dm);
+        //获取宽高
         screenWidth = dm.widthPixels;
         screenHeight = dm.heightPixels;
         init();
@@ -106,7 +107,7 @@ public class CameraPresenter implements Camera.PreviewCallback {
                @Override
                public void onPictureTaken(byte[] data, Camera camera) {
                    mCamera.startPreview();
-                   mCameraCallBack.onTakePicture(data);
+                   mCameraCallBack.onTakePicture(data,camera);
                }
            });
 
@@ -122,7 +123,7 @@ public class CameraPresenter implements Camera.PreviewCallback {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
                 //surface创建时执行
-                if(mCamera != null){
+                if(mCamera == null){
                     openCamera(mCameraId);
                 }
                 //并设置预览
@@ -334,7 +335,7 @@ public class CameraPresenter implements Camera.PreviewCallback {
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
         if(mCameraCallBack != null){
-            mCameraCallBack.onPreviewFrame(data);
+            mCameraCallBack.onPreviewFrame(data,camera);
         }
     }
 
@@ -345,7 +346,7 @@ public class CameraPresenter implements Camera.PreviewCallback {
     private void startPreview(){
         try {
             mCamera.setPreviewDisplay(mSurfaceHolder);
-            setCameraDisplayOrientation(mAppCompatActivity,mCameraId,mCamera);
+          //  setCameraDisplayOrientation(mAppCompatActivity,mCameraId,mCamera);
             mCamera.startPreview();
             startFaceDetect();
         } catch (IOException e) {
@@ -362,7 +363,7 @@ public class CameraPresenter implements Camera.PreviewCallback {
         mCamera.setFaceDetectionListener(new Camera.FaceDetectionListener() {
             @Override
             public void onFaceDetection(Camera.Face[] faces, Camera camera) {
-                mCameraCallBack.onFaceDetect(transForm(faces));
+                mCameraCallBack.onFaceDetect(transForm(faces),camera);
                 Log.d("sssd","检测到"+faces.length+"人脸");
             }
         });
@@ -398,8 +399,6 @@ public class CameraPresenter implements Camera.PreviewCallback {
         return arrayList;
 
     }
-
-
 
 
     /**
@@ -456,7 +455,7 @@ public class CameraPresenter implements Camera.PreviewCallback {
     /**
      * 释放相机资源
      */
-    private void releaseCamera(){
+    public void releaseCamera(){
         if(mCamera != null){
             mCamera.stopPreview();
             mCamera.setPreviewCallback(null);
