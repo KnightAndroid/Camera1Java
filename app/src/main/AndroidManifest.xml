@@ -11,6 +11,8 @@
     <uses-feature android:name="android.hardware.camera.autofocus"/>
     <!--存储图片或者视频-->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <!-- 允许应用挂载/卸载 外部文件系统。 -->
+    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
 
 
 
