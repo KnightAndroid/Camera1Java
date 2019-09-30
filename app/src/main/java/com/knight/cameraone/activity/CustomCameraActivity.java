@@ -72,7 +72,9 @@ public class CustomCameraActivity extends AppCompatActivity implements View.OnCl
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_customcamera);
+        //绑定View
         initBind();
+        //添加点击，触摸事件等监听
         initListener();
         //初始化CameraPresenter
         mCameraPresenter = new CameraPresenter(this,sf_camera);
@@ -80,6 +82,7 @@ public class CustomCameraActivity extends AppCompatActivity implements View.OnCl
         mCameraPresenter.setFrontOrBack(Camera.CameraInfo.CAMERA_FACING_BACK);
         //添加监听
         mCameraPresenter.setCameraCallBack(this);
+
         photoList = new ArrayList<>();
         mPhotosAdapter = new PhotosAdapter(photoList);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
@@ -233,4 +236,7 @@ public class CustomCameraActivity extends AppCompatActivity implements View.OnCl
         }
         return true;
     }
+
+
+
 }

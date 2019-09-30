@@ -48,7 +48,7 @@ public class CameraPresenter implements Camera.PreviewCallback {
     //SurfaceHolder对象
     private SurfaceHolder mSurfaceHolder;
 
-    //摄像头方向 默认后置
+    //摄像头Id 默认后置 0,前置的值是1
     private int mCameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
     //预览旋转的角度
     private int orientation;
@@ -65,9 +65,9 @@ public class CameraPresenter implements Camera.PreviewCallback {
     //当前缩放具体值
     private int mZoom;
 
-
+    //自定义回调
     public interface CameraCallBack {
-        //第一帧
+        //预览帧回调
         void onPreviewFrame(byte[] data, Camera camera);
 
         //拍照回调
@@ -91,13 +91,17 @@ public class CameraPresenter implements Camera.PreviewCallback {
         mSurfaceHolder = mSurfaceView.getHolder();
         DisplayMetrics dm = new DisplayMetrics();
         mAppCompatActivity.getWindowManager().getDefaultDisplay().getMetrics(dm);
-        //获取宽高
+        //获取宽高像素
         screenWidth = dm.widthPixels;
         screenHeight = dm.heightPixels;
+        Log.d("sssd-手机宽高尺寸:",screenWidth +"*"+screenHeight);
         //创建文件夹目录
         setUpFile();
         init();
     }
+
+
+
 
     /**
      * 设置前置还是后置
@@ -114,7 +118,7 @@ public class CameraPresenter implements Camera.PreviewCallback {
      */
     public void takePicture() {
         if (mCamera != null) {
-            //拍照回调
+            //拍照回调 点击拍照时回调 写一个空实现
             mCamera.takePicture(new Camera.ShutterCallback() {
                 @Override
                 public void onShutter() {
@@ -127,11 +131,14 @@ public class CameraPresenter implements Camera.PreviewCallback {
 
                 }
             }, new Camera.PictureCallback() {
-                //回调图片数据
+                //回调图片数据 点击拍照后相机返回的照片byte数组，照片数据
                 @Override
                 public void onPictureTaken(byte[] data, Camera camera) {
+                    //拍照后记得调用预览方法，不然会停在拍照图像的界面
                     mCamera.startPreview();
+                    //回调
                     mCameraCallBack.onTakePicture(data, camera);
+                    //保存图片
                     getPhotoPath(data);
 
                 }
@@ -141,7 +148,7 @@ public class CameraPresenter implements Camera.PreviewCallback {
     }
 
     /**
-     * 初始化
+     * 初始化增加回调
      */
     private void init() {
         mSurfaceHolder.addCallback(new SurfaceHolder.Callback() {
@@ -175,12 +182,14 @@ public class CameraPresenter implements Camera.PreviewCallback {
      * @return
      */
     private boolean openCamera(int FaceOrBack) {
+        //是否支持前后摄像头
         boolean isSupportCamera = isSupport(FaceOrBack);
         //如果支持
         if (isSupportCamera) {
             try {
                 mCamera = Camera.open(FaceOrBack);
                 initParameters(mCamera);
+                //设置预览回调
                 if (mCamera != null) {
                     mCamera.setPreviewCallback(this);
                 }
@@ -203,13 +212,17 @@ public class CameraPresenter implements Camera.PreviewCallback {
      */
     private void initParameters(Camera camera) {
         try {
+            //获取Parameters对象
             mParameters = camera.getParameters();
+            //设置预览格式
             mParameters.setPreviewFormat(ImageFormat.NV21);
             setPreviewSize();
             setPictureSize();
+            //连续自动对焦图像
             if (isSupportFocus(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
                 mParameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
             } else if (isSupportFocus(Camera.Parameters.FOCUS_MODE_AUTO)) {
+                //自动对焦(单次)
                 mParameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
             }
             //给相机设置参数
@@ -224,14 +237,14 @@ public class CameraPresenter implements Camera.PreviewCallback {
 
 
     /**
-     * 获取与指定宽高相等或者最接近的尺寸
+     *
      * 设置保存图片的尺寸
      */
     private void setPictureSize() {
         List<Camera.Size> localSizes = mParameters.getSupportedPictureSizes();
         Camera.Size biggestSize = null;
         Camera.Size fitSize = null;// 优先选预览界面的尺寸
-        Camera.Size previewSize = mParameters.getPreviewSize();
+        Camera.Size previewSize = mParameters.getPreviewSize();//获取预览界面尺寸
         float previewSizeScale = 0;
         if (previewSize != null) {
             previewSizeScale = previewSize.width / (float) previewSize.height;
@@ -275,8 +288,9 @@ public class CameraPresenter implements Camera.PreviewCallback {
      * 设置预览界面尺寸
      */
     private void setPreviewSize() {
+        //获取系统支持预览大小
         List<Camera.Size> localSizes = mParameters.getSupportedPreviewSizes();
-        Camera.Size biggestSize = null;
+        Camera.Size biggestSize = null;//最大分辨率
         Camera.Size fitSize = null;// 优先选屏幕分辨率
         Camera.Size targetSize = null;// 没有屏幕分辨率就取跟屏幕分辨率相近(大)的size
         Camera.Size targetSiz2 = null;// 没有屏幕分辨率就取跟屏幕分辨率相近(小)的size
@@ -284,18 +298,22 @@ public class CameraPresenter implements Camera.PreviewCallback {
             int cameraSizeLength = localSizes.size();
             for (int n = 0; n < cameraSizeLength; n++) {
                 Camera.Size size = localSizes.get(n);
+                Log.d("sssd-系统支持的尺寸:",size.width + "*" +size.height);
                 if (biggestSize == null ||
                         (size.width >= biggestSize.width && size.height >= biggestSize.height)) {
                     biggestSize = size;
                 }
 
+                //如果支持的比例都等于所获取到的宽高
                 if (size.width == screenHeight
                         && size.height == screenWidth) {
                     fitSize = size;
+                    //如果任一宽或者高等于所支持的尺寸
                 } else if (size.width == screenHeight
                         || size.height == screenWidth) {
                     if (targetSize == null) {
                         targetSize = size;
+                    //如果上面条件都不成立 如果任一宽高小于所支持的尺寸
                     } else if (size.width < screenHeight
                             || size.height < screenWidth) {
                         targetSiz2 = size;
@@ -314,6 +332,7 @@ public class CameraPresenter implements Camera.PreviewCallback {
             if (fitSize == null) {
                 fitSize = biggestSize;
             }
+            Log.d("sssd-最佳预览尺寸:",fitSize.width + "*" + fitSize.height);
             mParameters.setPreviewSize(fitSize.width, fitSize.height);
         }
     }
@@ -416,7 +435,9 @@ public class CameraPresenter implements Camera.PreviewCallback {
      */
     private void startPreview() {
         try {
+            //根据所传入的SurfaceHolder对象来设置实时预览
             mCamera.setPreviewDisplay(mSurfaceHolder);
+            //调整预览角度
             setCameraDisplayOrientation(mAppCompatActivity,mCameraId,mCamera);
             mCamera.startPreview();
             startFaceDetect();
@@ -429,7 +450,9 @@ public class CameraPresenter implements Camera.PreviewCallback {
      * 人脸检测
      */
     private void startFaceDetect() {
+        //开始人脸识别，这个要调用startPreview之后调用
         mCamera.startFaceDetection();
+        //添加回调
         mCamera.setFaceDetectionListener(new Camera.FaceDetectionListener() {
             @Override
             public void onFaceDetection(Camera.Face[] faces, Camera camera) {
@@ -483,6 +506,8 @@ public class CameraPresenter implements Camera.PreviewCallback {
         Camera.CameraInfo info =
                 new Camera.CameraInfo();
         Camera.getCameraInfo(cameraId, info);
+        //rotation是预览Window的旋转方向，对于手机而言，当在清单文件设置Activity的screenOrientation="portait"时，
+        //rotation=0，这时候没有旋转，当screenOrientation="landScape"时，rotation=1。
         int rotation = appCompatActivity.getWindowManager().getDefaultDisplay()
                 .getRotation();
         int degrees = 0;
@@ -502,6 +527,7 @@ public class CameraPresenter implements Camera.PreviewCallback {
         }
 
         int result;
+        //计算图像所要旋转的角度
         if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
             result = (info.orientation + degrees) % 360;
             result = (360 - result) % 360;  // compensate the mirror
@@ -509,6 +535,7 @@ public class CameraPresenter implements Camera.PreviewCallback {
             result = (info.orientation - degrees + 360) % 360;
         }
         orientation = result;
+        //调整预览图像旋转角度
         camera.setDisplayOrientation(result);
 
     }
@@ -529,8 +556,10 @@ public class CameraPresenter implements Camera.PreviewCallback {
      */
     public void releaseCamera() {
         if (mCamera != null) {
+            //停止预览
             mCamera.stopPreview();
             mCamera.setPreviewCallback(null);
+            //释放相机资源
             mCamera.release();
             mCamera = null;
             mHandler.removeMessages(1);
@@ -569,7 +598,9 @@ public class CameraPresenter implements Camera.PreviewCallback {
             public void run() {
                 long timeMillis = System.currentTimeMillis();
                 String time = SystemUtil.formatTime(timeMillis);
+                //拍照数量+1
                 photoNum++;
+                //图片名字
                 String name = SystemUtil.formatTime(timeMillis, SystemUtil.formatTime(photoNum) + ".jpg");
                 //创建具体文件
                 File file = new File(photosFile, name);
@@ -584,6 +615,7 @@ public class CameraPresenter implements Camera.PreviewCallback {
                 try {
                     FileOutputStream fos = new FileOutputStream(file);
                     try {
+                        //将数据写入文件
                         fos.write(data);
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -597,7 +629,7 @@ public class CameraPresenter implements Camera.PreviewCallback {
 
                     //将图片旋转
                     rotaeImageView(mCameraId,orientation,Configuration.insidePath + file.getName());
-                    //将图片保存到内部
+                    //将图片保存到手机相册
                     SystemUtil.saveAlbum(Configuration.insidePath + file.getName(), file.getName(), mAppCompatActivity);
                     //将图片复制到外部
                     SystemUtil.coptPicture(Configuration.insidePath + file.getName(),Configuration.OUTPATH,file.getName());

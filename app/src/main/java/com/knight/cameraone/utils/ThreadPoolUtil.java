@@ -4,7 +4,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * @author created by luguian
+ * @author created by knight
  * @organize
  * @Date 2019/9/29 9:31
  * @descript:线程帮助类

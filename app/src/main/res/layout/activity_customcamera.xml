@@ -6,8 +6,6 @@
     android:layout_height="match_parent">
 
 
-
-
     <SurfaceView
         android:id="@+id/sf_camera"
         android:layout_width="match_parent"
@@ -18,24 +16,23 @@
         android:id="@+id/tv_change_camera"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
         android:layout_marginRight="15dp"
         android:layout_marginTop="15dp"
-        android:background="@drawable/icon_change_camera_default"/>
-
-
+        android:background="@drawable/icon_change_camera_default"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="gone"/>
 
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/cy_photo"
         android:layout_width="60dp"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="15dp"
         android:maxHeight="120dp"
+        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/cl_bottom"
         app:layout_constraintLeft_toLeftOf="parent"
-        android:layout_marginLeft="15dp"
-        android:visibility="gone"
         >
 
     </android.support.v7.widget.RecyclerView>
@@ -47,32 +44,30 @@
         app:layout_constraintBottom_toBottomOf="parent"
         >
 
-
+        <!-- 拍照后显示的图片-->
         <ImageView
             android:id="@+id/iv_photo"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
             android:layout_marginLeft="20dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             />
-
+        <!-- 拍照按钮-->
         <TextView
             android:id="@+id/tv_takephoto"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
             android:background="@drawable/icon_take_photo_selector"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"/>
-
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
 
 
     </android.support.constraint.ConstraintLayout>
-
 
 
 </android.support.constraint.ConstraintLayout>
