@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CircleButtonView">
+        <attr name="minTime" format="integer"></attr>
+        <attr name="maxTime" format="integer"></attr>
+        <attr name="progressColor" format="color"></attr>
+        <attr name="progressWidth" format="dimension"></attr>
+    </declare-styleable>
+</resources>

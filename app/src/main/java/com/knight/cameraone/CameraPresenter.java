@@ -7,6 +7,7 @@ import android.graphics.ImageFormat;
 import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.hardware.Camera;
+import android.media.MediaRecorder;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
@@ -65,6 +66,12 @@ public class CameraPresenter implements Camera.PreviewCallback {
     //当前缩放具体值
     private int mZoom;
 
+    //视频录制
+    private MediaRecorder mediaRecorder;
+    //录制视频的videoSize
+    private int height,width;
+
+
     //自定义回调
     public interface CameraCallBack {
         //预览帧回调
@@ -88,6 +95,7 @@ public class CameraPresenter implements Camera.PreviewCallback {
     public CameraPresenter(AppCompatActivity mAppCompatActivity, SurfaceView mSurfaceView) {
         this.mAppCompatActivity = mAppCompatActivity;
         this.mSurfaceView = mSurfaceView;
+        mSurfaceView.getHolder().setKeepScreenOn(true);
         mSurfaceHolder = mSurfaceView.getHolder();
         DisplayMetrics dm = new DisplayMetrics();
         mAppCompatActivity.getWindowManager().getDefaultDisplay().getMetrics(dm);
@@ -160,6 +168,9 @@ public class CameraPresenter implements Camera.PreviewCallback {
                 }
                 //并设置预览
                 startPreview();
+                //新增获取系统支持视频
+                getVideoSize();
+                mediaRecorder = new MediaRecorder();
             }
 
             @Override
@@ -216,6 +227,7 @@ public class CameraPresenter implements Camera.PreviewCallback {
             mParameters = camera.getParameters();
             //设置预览格式
             mParameters.setPreviewFormat(ImageFormat.NV21);
+            mParameters.setExposureCompensation(5);
             setPreviewSize();
             setPictureSize();
             //连续自动对焦图像
@@ -340,19 +352,22 @@ public class CameraPresenter implements Camera.PreviewCallback {
 
     /**
      * 变焦
-     * @param zoom
+     * @param zoom 缩放系数
      */
     public void setZoom(int zoom){
        if(mCamera == null){
            return;
        }
+       //获取Paramters对象
        Camera.Parameters parameters;
        parameters = mCamera.getParameters();
-       //不支持变焦
+       //如果不支持变焦
        if(!parameters.isZoomSupported()){
            return;
        }
+       //
        parameters.setZoom(zoom);
+       //Camera对象重新设置Paramters对象参数
        mCamera.setParameters(parameters);
        mZoom = zoom;
 
@@ -541,14 +556,43 @@ public class CameraPresenter implements Camera.PreviewCallback {
     }
 
     /**
-     * 前后摄像投切换
+     * 前后摄像切换
      */
     public void switchCamera() {
+        //先释放资源
         releaseCamera();
+        //在Android P之前 Android设备仍然最多只有前后两个摄像头，在Android p后支持多个摄像头 用户想打开哪个就打开哪个
         mCameraId = (mCameraId + 1) % Camera.getNumberOfCameras();
+        //打开摄像头
         openCamera(mCameraId);
+        //切换摄像头之后开启预览
         startPreview();
     }
+
+
+//    这里可以找准前后摄像头的id
+//    int frontIndex = -1;
+//    int backIndex = -1;
+//    int cameraCount = Camera.getNumberOfCameras();
+//    Camera.CameraInfo info = new Camera.CameraInfo();
+//        for(int cameraIndex = 0;cameraIndex < cameraCount;cameraIndex ++){
+//        Camera.getCameraInfo(cameraIndex,info);
+//        if(info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT){
+//            frontIndex = cameraIndex;
+//        }else if(info.facing == Camera.CameraInfo.CAMERA_FACING_BACK){
+//            backIndex = cameraIndex;
+//        }
+//
+//    }
+//
+//    //跟据传入的type来判断
+//        if(type == FRONT && frontIndex != -1){
+//
+//        openCamera(frontIndex);
+//    } else if(type == BACK && backIndex != -1){
+//        openCamera(backIndex);
+//
+//    }
 
 
     /**
@@ -560,9 +604,16 @@ public class CameraPresenter implements Camera.PreviewCallback {
             mCamera.stopPreview();
             mCamera.setPreviewCallback(null);
             //释放相机资源
+            mCamera.unlock();
             mCamera.release();
             mCamera = null;
             mHandler.removeMessages(1);
+        }
+
+        if(mediaRecorder != null){
+            mediaRecorder.release();
+            mediaRecorder = null;
+
         }
     }
 
@@ -587,7 +638,6 @@ public class CameraPresenter implements Camera.PreviewCallback {
 
         }
     }
-
 
     /**
      * @return 返回路径
@@ -628,7 +678,7 @@ public class CameraPresenter implements Camera.PreviewCallback {
                     }
 
                     //将图片旋转
-                    rotaeImageView(mCameraId,orientation,Configuration.insidePath + file.getName());
+                    rotateImageView(mCameraId,orientation,Configuration.insidePath + file.getName());
                     //将图片保存到手机相册
                     SystemUtil.saveAlbum(Configuration.insidePath + file.getName(), file.getName(), mAppCompatActivity);
                     //将图片复制到外部
@@ -651,19 +701,35 @@ public class CameraPresenter implements Camera.PreviewCallback {
      * @param orientation 拍照时传感器方向
      * @param path 图片路径
      */
-    private void rotaeImageView(int cameraId,int orientation,String path){
+    private void rotateImageView(int cameraId,int orientation,String path){
         Bitmap bitmap = BitmapFactory.decodeFile(path);
         Matrix matrix = new Matrix();
-        matrix.postRotate(orientation);
-        //后转
-        if(cameraId == 1){
+        // 创建新的图片
+        Bitmap resizedBitmap;
+        //0是后置
+        if(cameraId == 0){
             if(orientation == 90){
                 matrix.postRotate(90);
             }
         }
+        //1是前置
+        if(cameraId == 1){
+            matrix.postRotate(270);
+        }
         // 创建新的图片
-        Bitmap resizedBitmap = Bitmap.createBitmap(bitmap, 0, 0,
+        resizedBitmap = Bitmap.createBitmap(bitmap, 0, 0,
                 bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+
+        //新增 如果是前置 需要镜面翻转处理
+        if(cameraId == 1){
+            Matrix matrix1 = new Matrix();
+            matrix1.postScale(-1f,1f);
+            resizedBitmap = Bitmap.createBitmap(resizedBitmap, 0, 0,
+                    resizedBitmap.getWidth(), resizedBitmap.getHeight(), matrix1, true);
+
+        }
+
+
         File file = new File(path);
         //重新写入文件
         try{
@@ -672,12 +738,6 @@ public class CameraPresenter implements Camera.PreviewCallback {
             fos = new FileOutputStream(file);
             //默认jpg
             resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-//            if ("png".equals(imageType)) {
-//                bitmap.compress(Bitmap.CompressFormat.PNG, 70, fos);
-//            } else {
-//                bitmap.compress(Bitmap.CompressFormat.JPEG, 70, fos);
-//            }
-
             fos.flush();
             fos.close();
             resizedBitmap.recycle();
@@ -687,6 +747,12 @@ public class CameraPresenter implements Camera.PreviewCallback {
         }
 
     }
+
+    //            if ("png".equals(imageType)) {
+//                bitmap.compress(Bitmap.CompressFormat.PNG, 70, fos);
+//            } else {
+//                bitmap.compress(Bitmap.CompressFormat.JPEG, 70, fos);
+//            }
     @SuppressLint("HandlerLeak")
     Handler mHandler = new Handler(){
         @SuppressLint("NewApi")
@@ -701,5 +767,173 @@ public class CameraPresenter implements Camera.PreviewCallback {
             }
         }
     };
+
+    /**
+     * 自动变焦
+     */
+    public void autoFoucus(){
+        if(mCamera == null){
+            mCamera.autoFocus(new Camera.AutoFocusCallback() {
+                @Override
+                public void onAutoFocus(boolean success, Camera camera) {
+
+                }
+            });
+        }
+    }
+
+
+    /**
+     * 获取输出视频的width和height
+     *
+     */
+    public void getVideoSize(){
+        int biggest_width=0 ,biggest_height=0;//最大分辨率
+        int fitSize_width=0,fitSize_height=0;
+        int fitSize_widthBig=0,fitSize_heightBig=0;
+        Camera.Parameters parameters = mCamera.getParameters();
+        //得到系统支持视频格式
+        List<Camera.Size> videoSize = parameters.getSupportedVideoSizes();
+        for(int i = 0;i < videoSize.size();i++){
+            int w = videoSize.get(i).width;
+            int h = videoSize.get(i).height;
+            if ((biggest_width == 0 && biggest_height == 0)||
+                    (w >= biggest_height && h >= biggest_width)) {
+                biggest_width = w;
+                biggest_height = h;
+            }
+
+            if(w == screenHeight && h == screenWidth){
+                width = w;
+                height = h;
+            }else if(w == screenHeight || h == screenWidth){
+                if(width == 0 || height == 0){
+                    fitSize_width = w;
+                    fitSize_height = h;
+
+                }else if(w < screenHeight || h < screenWidth){
+                    fitSize_widthBig = w;
+                    fitSize_heightBig = h;
+
+                }
+            }
+        }
+
+        if(width == 0 && height == 0){
+            width = fitSize_width;
+            height = fitSize_height;
+        }
+
+        if(width == 0 && height == 0){
+            width = fitSize_widthBig;
+            height = fitSize_heightBig;
+        }
+
+        if(width == 0 && height == 0){
+            width = biggest_width;
+            height = biggest_height;
+
+        }
+    }
+
+
+    /**
+     *
+     * 停止录制
+     */
+    public void stopRecord(){
+        if(mediaRecorder != null){
+            mediaRecorder.release();
+            mediaRecorder = null;
+        }
+
+        if(mCamera != null){
+            mCamera.release();
+        }
+        openCamera(mCameraId);
+        //并设置预览
+        startPreview();
+    }
+
+
+    /**
+     *
+     * 录制方法
+     */
+    public void startRecord(String path,String name){
+        //解锁Camera硬件
+        mCamera.unlock();
+        mediaRecorder.setCamera(mCamera);
+        //音频源 麦克风
+        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
+        //视频源 camera
+        mediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
+        //输出格式
+        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+        //音频编码
+        mediaRecorder.setAudioEncoder(MediaRecorder.VideoEncoder.DEFAULT);
+        //视频编码
+        mediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
+        //设置帧频率
+        mediaRecorder.setVideoEncodingBitRate(1 * 1024 * 1024 * 100);
+        Log.d("sssd视频宽高：","宽"+width+"高"+height+"");
+        mediaRecorder.setVideoSize(width,height);
+        //每秒的帧数
+        mediaRecorder.setVideoFrameRate(24);
+        //调整视频旋转角度 如果不设置 后置和前置都会被旋转播放
+        if(mCameraId == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+            if(orientation == 270 || orientation == 90 || orientation == 180){
+                mediaRecorder.setOrientationHint(180);
+            }else{
+                mediaRecorder.setOrientationHint(0);
+            }
+        }else{
+            if(orientation == 90){
+                mediaRecorder.setOrientationHint(90);
+            }
+        }
+
+        File file = new File(path);
+        if(!file.exists()){
+            file.mkdirs();
+        }
+        //设置输出文件名字
+        mediaRecorder.setOutputFile(path + File.separator + name + "mp4");
+        File file1 = new File(path + File.separator + name + "mp4");
+        if(file1.exists()){
+            file1.delete();
+        }
+        //设置预览
+        mediaRecorder.setPreviewDisplay(mSurfaceView.getHolder().getSurface());
+        try {
+            //准备录制
+            mediaRecorder.prepare();
+            //开始录制
+            mediaRecorder.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+    /**
+     *
+     * 闪光灯
+     * @param turnSwitch true 为开启 false 为关闭
+     */
+    public void turnLight(boolean turnSwitch){
+        if(mCamera == null){
+            return;
+        }
+        Camera.Parameters parameters = mCamera.getParameters();
+        if(parameters == null){
+            return;
+        }
+
+        parameters.setFlashMode(turnSwitch ? Camera.Parameters.FLASH_MODE_TORCH : Camera.Parameters.FLASH_MODE_OFF);
+        mCamera.setParameters(parameters);
+    }
+
 
 }

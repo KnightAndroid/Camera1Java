@@ -1,5 +1,6 @@
 package com.knight.cameraone.activity;
 
+import android.content.Intent;
 import android.graphics.RectF;
 import android.hardware.Camera;
 import android.os.Bundle;
@@ -7,19 +8,24 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.request.RequestOptions;
 import com.knight.cameraone.CameraPresenter;
+import com.knight.cameraone.CircleButtonView;
+import com.knight.cameraone.Configuration;
 import com.knight.cameraone.R;
 import com.knight.cameraone.adapter.PhotosAdapter;
 import com.knight.cameraone.utils.SystemUtil;
+import com.knight.cameraone.utils.ToastUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,10 +38,10 @@ import java.util.List;
  * @descript:
  */
 
-public class CustomCameraActivity extends AppCompatActivity implements View.OnClickListener,CameraPresenter.CameraCallBack,View.OnTouchListener {
+public class CustomCameraActivity extends AppCompatActivity implements View.OnClickListener,CameraPresenter.CameraCallBack,View.OnTouchListener,PhotosAdapter.OnItemClickListener {
 
     //拍照
-    private TextView tv_takephoto;
+    private CircleButtonView tv_takephoto;
     //逻辑层
     private CameraPresenter mCameraPresenter;
     //SurfaceView
@@ -44,8 +50,12 @@ public class CustomCameraActivity extends AppCompatActivity implements View.OnCl
     private ImageView iv_photo;
     //更换摄像头
     private TextView tv_change_camera;
+    //闪光灯
+    private TextView tv_flash;
 
+    //默认状态
     private static final int MODE_INIT = 0;
+    //两个触摸点触摸屏幕状态
     private static final int MODE_ZOOM = 1;
     //标识模式
     private int mode = MODE_INIT;
@@ -63,6 +73,10 @@ public class CustomCameraActivity extends AppCompatActivity implements View.OnCl
     private PhotosAdapter mPhotosAdapter;
     //图片List
     private List<String> photoList;
+    private boolean isMove = false;
+
+    private boolean isTurn = true;
+
 
 
 
@@ -85,25 +99,30 @@ public class CustomCameraActivity extends AppCompatActivity implements View.OnCl
 
         photoList = new ArrayList<>();
         mPhotosAdapter = new PhotosAdapter(photoList);
+        mPhotosAdapter.setOnItemClickListener(this);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         ((LinearLayoutManager) layoutManager).setOrientation(OrientationHelper.VERTICAL);
         cy_photo.setLayoutManager(layoutManager);
         cy_photo.setAdapter(mPhotosAdapter);
 
+
     }
     @Override
     public void onClick(View v) {
         switch (v.getId()){
-            case R.id.tv_takephoto:
-                //拍照的调用方法
-                mCameraPresenter.takePicture();
-                break;
+            //拍照
             case R.id.iv_photo:
                 cy_photo.setVisibility(cy_photo.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
                 break;
+            //改变摄像头
             case R.id.tv_change_camera:
                 mCameraPresenter.switchCamera();
                 break;
+            //关闭还是开启闪光灯
+            case R.id.tv_flash:
+                mCameraPresenter.turnLight(isTurn);
+                tv_flash.setBackgroundResource(isTurn ? R.drawable.icon_turnon : R.drawable.icon_turnoff);
+                isTurn = !isTurn;
             default:
                 break;
         }
@@ -118,6 +137,7 @@ public class CustomCameraActivity extends AppCompatActivity implements View.OnCl
         iv_photo = findViewById(R.id.iv_photo);
         cy_photo = findViewById(R.id.cy_photo);
         tv_change_camera = findViewById(R.id.tv_change_camera);
+        tv_flash = findViewById(R.id.tv_flash);
     }
 
 
@@ -126,10 +146,38 @@ public class CustomCameraActivity extends AppCompatActivity implements View.OnCl
      *
      */
     private void initListener(){
-        tv_takephoto.setOnClickListener(this);
         sf_camera.setOnTouchListener(this);
         iv_photo.setOnClickListener(this);
         tv_change_camera.setOnClickListener(this);
+        tv_flash.setOnClickListener(this);
+        //点击事件
+        tv_takephoto.setOnClickListener(new CircleButtonView.OnClickListener() {
+            @Override
+            public void onClick() {
+                //拍照的调用方法
+                mCameraPresenter.takePicture();
+            }
+        });
+
+        //长按事件
+        tv_takephoto.setOnLongClickListener(new CircleButtonView.OnLongClickListener() {
+            @Override
+            public void onLongClick() {
+                 mCameraPresenter.startRecord(Configuration.OUTPATH,"video");
+
+            }
+
+            @Override
+            public void onNoMinRecord(int currentTime) {
+                ToastUtil.showShortToast(CustomCameraActivity.this,"录制时间太短～");
+            }
+
+            @Override
+            public void onRecordFinishedListener() {
+                mCameraPresenter.stopRecord();
+                startActivity(new Intent(CustomCameraActivity.this,PlayAudioActivity.class));
+            }
+        });
     }
 
 
@@ -191,24 +239,29 @@ public class CustomCameraActivity extends AppCompatActivity implements View.OnCl
     /**
      *
      * 触摸回调
-     * @param v
-     * @param event
+     * @param v 添加Touch事件具体的view
+     * @param event 具体事件
      * @return
      */
     @Override
     public boolean onTouch(View v, MotionEvent event) {
+        //无论多少跟手指加进来，都是MotionEvent.ACTION_DWON MotionEvent.ACTION_POINTER_DOWN
+        //MotionEvent.ACTION_MOVE:
         switch (event.getAction() & MotionEvent.ACTION_MASK){
             //手指按下屏幕
             case MotionEvent.ACTION_DOWN:
                mode = MODE_INIT;
                break;
-            //当屏幕上已经有触摸点吃鱼按下的状态的时候，再有新的触电被按下时会触发
+            //当屏幕上已经有触摸点按下的状态的时候，再有新的触摸点被按下时会触发
             case MotionEvent.ACTION_POINTER_DOWN:
                mode = MODE_ZOOM;
                //计算两个手指的距离 两点的距离
                startDis = SystemUtil.twoPointDistance(event);
                break;
+            //移动的时候回调
             case MotionEvent.ACTION_MOVE:
+                isMove = true;
+               //这里主要判断有两个触摸点的时候才触发
                if(mode == MODE_ZOOM){
                    //只有两个点同时触屏才执行
                    if(event.getPointerCount() < 2){
@@ -220,23 +273,40 @@ public class CustomCameraActivity extends AppCompatActivity implements View.OnCl
                    int scale = (int) ((endDis - startDis) / 10f);
                    if(scale >= 1 || scale <= -1){
                        int zoom = mCameraPresenter.getZoom() + scale;
-                       //判断zoom是否超出变焦j距离
+                       //判断zoom是否超出变焦距离
                        if(zoom > mCameraPresenter.getMaxZoom()){
                            zoom = mCameraPresenter.getMaxZoom();
                        }
+                       //如果系数小于0
                        if(zoom < 0 ){
                            zoom = 0;
                        }
+                       //设置焦距
                        mCameraPresenter.setZoom(zoom);
                        //将最后一次的距离设为当前距离
                        startDis = endDis;
                    }
                }
                break;
+            case MotionEvent.ACTION_UP:
+                //判断是否点击屏幕 如果是自动聚焦
+                if(isMove == false){
+                    //自动聚焦
+                    mCameraPresenter.autoFoucus();
+                }
+                isMove = false;
+                break;
         }
         return true;
     }
 
-
-
+    /**
+     * 跳转到大图
+     * @param v
+     * @param path
+     */
+    @Override
+    public void onItemClick(View v, String path) {
+       startActivity(new Intent(CustomCameraActivity.this,BigPhotoActivity.class).putExtra("imagePhoto",path));
+    }
 }

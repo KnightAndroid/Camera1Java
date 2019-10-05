@@ -21,7 +21,7 @@ import java.util.List;
  * @descript:照片
  */
 
-public class PhotosAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class PhotosAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements View.OnClickListener {
 
 
     private List<String> photoLists;
@@ -31,12 +31,36 @@ public class PhotosAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         this.photoLists = photoLists;
     }
 
+    @Override
+    public void onClick(View v) {
+       if(photoLists != null){
+           onItemClickListener.onItemClick(v,photoLists.get((int)v.getTag()));
+
+       }
+    }
+
+
+    public interface OnItemClickListener{
+        void onItemClick(View v,String path);
+    }
+
+    private OnItemClickListener onItemClickListener;
+
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener){
+        this.onItemClickListener = onItemClickListener;
+    }
+
 
 
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new ViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_photo,parent,false));
+        View view= LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_photo,parent,false);
+        ViewHolder holder=new ViewHolder(view);
+        //绑定监听事件
+        view.setOnClickListener(this);
+        return holder;
     }
 
     @Override
@@ -47,6 +71,7 @@ public class PhotosAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                         .override(((ViewHolder)holder).mImageView.getWidth(), ((ViewHolder)holder).mImageView.getHeight())
                         .error(R.drawable.default_person_icon))
                 .into(((ViewHolder)holder).mImageView);
+        holder.itemView.setTag(position);
     }
 
     @Override

@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest package="com.knight.cameraone"
-          xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.knight.cameraone">
 
 
     <!--权限申请 相机-->
-    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.CAMERA" />
     <!--使用uses-feature指定需要相机资源-->
-    <uses-feature android:name="android.hardware.Camera"/>
+    <uses-feature android:name="android.hardware.Camera" />
     <!--需要自动聚焦 -->
-    <uses-feature android:name="android.hardware.camera.autofocus"/>
+    <uses-feature android:name="android.hardware.camera.autofocus" />
     <!--存储图片或者视频-->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <!-- 允许应用挂载/卸载 外部文件系统。 -->
-    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
-
+    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO"></uses-permission>
 
 
     <application
@@ -23,12 +23,13 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".activity.MainActivity"
-                  android:screenOrientation="portrait">
+        <activity
+            android:name=".activity.MainActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <provider
@@ -41,8 +42,15 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <activity android:name=".activity.CustomCameraActivity"
-                  android:screenOrientation="portrait"/>
+        <activity
+            android:name=".activity.CustomCameraActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.PlayAudioActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activity.BigPhotoActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

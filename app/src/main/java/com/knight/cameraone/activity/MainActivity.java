@@ -84,11 +84,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                     != PackageManager.PERMISSION_GRANTED
                     || ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED
+                    || ContextCompat.checkSelfPermission(this,Manifest.permission.RECORD_AUDIO)
                     != PackageManager.PERMISSION_GRANTED) {
                 //多个权限一起申请
                 ActivityCompat.requestPermissions(this, new String[]{
                         Manifest.permission.CAMERA,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                        Manifest.permission.RECORD_AUDIO
                 }, 1);
 
             }
@@ -115,7 +118,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if (grantResults.length > 1) {
                     if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                         if (grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-                            //全部授于可以进行往下操作
+                            if(grantResults[2] == PackageManager.PERMISSION_GRANTED){
+                                //全部授于可以进行往下操作
+                            }
+
                         } else {
                             //拒绝就要强行跳转设置界面
                             Permissions.showPermissionsSettingDialog(this, permissions[1]);
