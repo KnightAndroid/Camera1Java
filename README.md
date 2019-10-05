@@ -2146,6 +2146,7 @@ public class PlayAudioActivity extends AppCompatActivity implements MediaPlayer.
 实际效果：
 
 ![最终效果](picture/最终效果.gif)
+
 视频存放路径信息：
 
 ![视频存放信息](picture/视频存放信息.png)
