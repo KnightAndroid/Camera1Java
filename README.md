@@ -67,7 +67,8 @@ private final SurfaceHolder mSurfaceHolder = new SurfaceHolder(){
 
 `Surface`是从`Object`派生而来，实现了`Parcelable`接口，看到`Parcelable`很容易让人想到数据，而`SurfaceView`就是用来展示`Surface`数据的，两者的关系可以用下面一张图来描述：
 
-![SurfaceView和Suface](https://user-gold-cdn.xitu.io/2019/9/2/16cf2b112ae11be0?w=724&h=352&f=png&s=14526)
+![SurfaceView和Suface](picture/SurfaceView和Surface的关系.png)
+
 **Surface是通过SurfaceView才能展示其中内容。**
 
 到这里也许大家会有一个疑问，`SurfaceView`和普通的`View`有什么区别？相机开发就一定要用`SurfaceView`吗？
@@ -154,15 +155,16 @@ private final SurfaceHolder mSurfaceHolder = new SurfaceHolder(){
   
 上面三者的关系可以用下面一张图来表示：
 
-![三者关系图](https://user-gold-cdn.xitu.io/2019/9/3/16cf63be6d15d252?w=565&h=233&f=png&s=6237)
+![三者关系图](picture/三者关系图.png)
   
 ## 三、Camera
 查看源码时，发现`android.hardware.camera`google不推荐使用了：
 
-![camera](https://user-gold-cdn.xitu.io/2019/9/3/16cf6513481dc5c2?w=582&h=397&f=png&s=28859)
+![camera](picture/camera.png)
+
 下面讲讲`Camera`最主要的成员和一些接口：
 
-![Camera核心类](https://user-gold-cdn.xitu.io/2019/10/1/16d86dffead5243a?w=2414&h=2674&f=png&s=647704)
+![Camera核心类](picture/Camera的类.png)
 
 ### 1.CameraInfo
 在`Camera`类里，`CameraInfo`是静态内部类：
@@ -231,7 +233,8 @@ private final SurfaceHolder mSurfaceHolder = new SurfaceHolder(){
 
 ##### 1.1.1.屏幕坐标方向
 
-![屏幕方向](https://user-gold-cdn.xitu.io/2019/9/5/16d0074e08e47391?w=296&h=427&f=png&s=4862)
+![屏幕方向](picture/屏幕方向.png)
+
 在Android系统中，以屏幕左上角为坐标系统的原点(0,0)坐标，向右延伸是X轴的正方向，向下延伸是y轴的正方向，如上图所示。
 
 ##### 1.1.2.自然方向
@@ -251,7 +254,8 @@ private final SurfaceHolder mSurfaceHolder = new SurfaceHolder(){
 ##### 1.1.3.图像传感器方向
 手机相机的图像数据都是来自于摄像头硬件的图像传感器，这个传感器在被固定到手机上后有一个默认的取景方向，方向一般是和手机横屏方向一致，如下图：
 
-![传感器方向](https://user-gold-cdn.xitu.io/2019/9/5/16d00f2cac538bb0?w=544&h=359&f=png&s=5052)
+![传感器方向](picture/图像传感器方向.png)
+
 和竖屏应用方向呈90度。
 
 ##### 1.1.4.相机预览方向
@@ -281,16 +285,16 @@ private final SurfaceHolder mSurfaceHolder = new SurfaceHolder(){
 下面举个简单例子：
 
 
-![相机预览界面坐标解析](https://user-gold-cdn.xitu.io/2019/9/6/16d04992f23845dd?w=933&h=604&f=png&s=18022)
+![相机预览界面坐标解析](picture/预览界面坐标解析.png)
 
 这里重点讲解一下**竖屏**下：
 
 
-![相机和图像传感器方向](https://user-gold-cdn.xitu.io/2019/9/6/16d052c73e086553?w=682&h=629&f=png&s=10143)
+![相机和图像传感器方向](picture/自然方向和图像传感器方向.png)
 
 
 
-![后置相机预览图像](https://user-gold-cdn.xitu.io/2019/9/6/16d0595eb2739bc2?w=735&h=476&f=png&s=25138)
+![后置相机预览图像](picture/后置相机预览图像.png)
 
 需要结合上下两张图来看：
 * 当图像传感器获得图像后，就会知道这幅图像每个坐标的像素值，但是要显示到屏幕上就要**根据屏幕自然方向的坐标来显示(竖屏下屏幕自然方向坐标系和后置相机图像传感器方向呈90度)**，所以图像会逆时针旋转旋转90度，显示到屏幕坐标系上。
@@ -301,17 +305,17 @@ private final SurfaceHolder mSurfaceHolder = new SurfaceHolder(){
 * 在预览图像是真实物体的镜像
 * 拍出的照片和真实场景一样
 
-![前置相机预览界面坐标解析](https://user-gold-cdn.xitu.io/2019/9/6/16d057f96567ca02?w=921&h=602&f=png&s=17979)
+![前置相机预览界面坐标解析](picture/前置相机预览界面坐标解析.png)
 
 同理这里重点讲一下，**前置竖屏**：
 
-![前置相机和图像传感器方向](https://user-gold-cdn.xitu.io/2019/9/6/16d058980f16aed0?w=715&h=601&f=png&s=10485)
+![前置相机和图像传感器方向](picture/前置相机和图像传感器方向.png)
 
-![前置相机收集图像方向](https://user-gold-cdn.xitu.io/2019/9/6/16d05aa98fe8ac28?w=727&h=482&f=png&s=47632)
+![前置相机收集图像方向](picture/前置相机收集图像方向.png)
 
-![前置相机预览界面坐标解析](https://user-gold-cdn.xitu.io/2019/9/6/16d05be0120b2237?w=695&h=603&f=png&s=10385)
+![前置相机预览界面坐标解析](picture/前置相机预览方向解析.png)
 
-![前置相机预览图像方向](https://user-gold-cdn.xitu.io/2019/9/6/16d05ac00b6617d5?w=740&h=430&f=png&s=35230)
+![前置相机预览图像方向](picture/前置相机预览图像方向.png)
 
 在前置相机中，**预览图像**和**相机收集图像**是镜像关系，上面图中`Android`图标中前置**收集图像**和**预览图像**时相反的，**前置相机图像传感器方向和前置相机预览图像方向是左右相反的**，上图也有体现。
 
@@ -648,10 +652,11 @@ rotation是预览Window的旋转方向，对于手机而言，当在清单文件
 ```
 #### 2.1.实际效果
 
-![调用系统相机效果](https://user-gold-cdn.xitu.io/2019/9/24/16d6136c41c0a87a?w=720&h=1280&f=gif&s=5190840)
+![调用系统相机效果](picture/调用系统相机效果.gif)
+
 上面是调用系统相机拍照后的效果，另外照片存储到了外部存储的根目录位置：
 
-![系统相机存储路径](https://user-gold-cdn.xitu.io/2019/9/30/16d7fc6faabf7c54?w=627&h=1069&f=png&s=109740)
+![系统相机存储路径](picture/系统相机存储路径.png)
 
 ### 3.自定义相机
 下面按照以下步骤来实现自定义相机开发：
@@ -987,7 +992,7 @@ protected void onDestroy(){
 ```
 现在先看看效果：
 
-![效果一](https://user-gold-cdn.xitu.io/2019/9/30/16d80397c7c7ef70?w=480&h=853&f=gif&s=4369038)
+![效果一](picture/效果一.gif)
 
 #### 3.7.调整预览图像角度
 发现预览效果图逆时针旋转了90度，当你把手机横屏摆放也是，上面已经说过，因为屏幕自然方向和图像传感器方向不一致造成的，需要重新设置预览时的角度，采用官方的推荐方法：
@@ -1057,7 +1062,7 @@ private void startPreview() {
 ```
 再次看下运行效果：
 
-![没有设置预览界面尺寸的效果](https://user-gold-cdn.xitu.io/2019/9/30/16d80d728ae16bf1?w=1045&h=1909&f=png&s=1351382)
+![没有设置预览界面尺寸的效果](picture/没有设置预览界面尺寸的效果图.png)
 
 #### 3.8.调整预览和保存图像尺寸
 上面调整了预览角度的问题后，因为在市面上安卓机型五花八门，屏幕分辨率也很多，为了避免图像变形，需要调整预览图像和保存的图像尺寸：
@@ -1202,7 +1207,7 @@ private void initParameters(Camera camera) {
 ```
 下面看看在vivo x9所支持的尺寸：
 
-![所支持的预览尺寸](https://user-gold-cdn.xitu.io/2019/9/30/16d81454c7b47dc9?w=835&h=553&f=png&s=97151)
+![所支持的预览尺寸](picture/预览最佳尺寸.png)
 #### 3.9.拍照
 下面进行拍照处理，拍照保存图片有两种方式：
 * 直接调用`Camera.takePicture(ShutterCallback shutter,PictureCallback raw,PictureCallback jpeg)`
@@ -1487,16 +1492,17 @@ public void getPhotoFile(String imagePath) {
 ```
 效果如下：
 
-![效果二](https://user-gold-cdn.xitu.io/2019/10/1/16d866e89d57640b?w=720&h=1280&f=gif&s=5017407)
+![效果二](picture/效果二.gif)
+
 看看拍照后存储的照片：
 
-![存储的照片路径](https://user-gold-cdn.xitu.io/2019/10/1/16d86746e630f8d5?w=1346&h=1542&f=png&s=354349)
+![存储的照片路径](picture/存储照片的目录.png)
 
 
-![照片信息](https://user-gold-cdn.xitu.io/2019/10/1/16d86767d604d465?w=1058&h=555&f=png&s=57173)
+![照片信息](picture/照片信息.png)
 
 
-![存储后的照片](https://user-gold-cdn.xitu.io/2019/10/1/16d867cfec969394?w=1080&h=1920&f=png&s=1163928)
+![存储后的照片](picture/存储后的照片.png)
 
 发现拍照后存储的照片经过逆时针90度旋转，需要将顺时针90度，原因在上面分析**orientation**的时候讲述过，虽然调整来预览图像角度，但是并不能调整图片传感器的图片方向，所以只能保存图片后再将图片旋转：
 ```java
@@ -1602,10 +1608,11 @@ public void switchCamera() {
 ```
 效果如下图：
 
-![前后摄像头变换](https://user-gold-cdn.xitu.io/2019/10/3/16d9001e647b5079?w=720&h=1280&f=gif&s=4232019)
+![前后摄像头变换](picture/前后摄像头变换.gif)
+
 在看看拍照后存储的照片:
 
-![前置摄像头拍照](https://user-gold-cdn.xitu.io/2019/10/3/16d900896f600018?w=1067&h=1918&f=png&s=2369710)
+![前置摄像头拍照](picture/前置摄像头拍照.png)
 这里可以发现，在预览的时候只是顺时针调用`setDisplayOrientation()`设置预览方向，并没有做镜面翻转，为什么切换前置时，预览效果跟实物一样呢，原来是在调用`setDisplayOrientation()`做了水平镜面的翻转，但是拍照后保存下来的照片是没有水平翻转的，所以同时要对拍照后的照片做水平方向镜面翻转，那就在旋转图片里的方法加上翻转处理：
 ```java
 /**
@@ -1778,7 +1785,7 @@ public void autoFoucus(){
 ```
 最终效果如下图：
 
-![加入自动变焦效果图](https://user-gold-cdn.xitu.io/2019/10/1/16d874186a15403a?w=720&h=1280&f=gif&s=4515139)
+![加入自动变焦效果图](picture/加入自动变焦效果.gif)
 
 #### 3.12.闪光灯设置
 通过`Parameters.setFlashMode(String value)`来控制闪光灯，参数类型有以下：
@@ -1833,7 +1840,7 @@ public void onClick(View v) {
 ```
 实际效果：
 
-![闪光灯效果](https://user-gold-cdn.xitu.io/2019/10/5/16d9a44606291f66?w=720&h=1280&f=gif&s=2978245)
+![闪光灯效果](picture/闪光灯效果.gif)
 
 
 #### 3.13.视频录制
@@ -1845,7 +1852,8 @@ public void onClick(View v) {
 ##### 3.13.1.MediaRecorder基本介绍
 >MediaRecorder是Android中面向应用层的封装，用于提供音视频编码的封装操作的工具，下面直接上官方图：
 
-![官方MediaRecorder生命周期图](https://user-gold-cdn.xitu.io/2019/10/3/16d9130a98f8dbe1?w=726&h=753&f=png&s=208420)
+![官方MediaRecorder生命周期图](picture/MediaRecorder官方生命周期图.png)
+
 下面简单介绍这几个生命周期的状态意思：
 * `Initial`:在`MediaRecorder`对象被创建时或者调用`reset()`方法后，会处于该状态。
 * `Initialized`:当调用`setAudioSource()`或者`setVideoSource()`后就会处于该状态，这两个方法主要用于设置音视频的播放源配置，在该状态下可以调用`reset()`回到`Initial`状态。
@@ -2137,10 +2145,10 @@ public class PlayAudioActivity extends AppCompatActivity implements MediaPlayer.
 ```
 实际效果：
 
-![最终效果](https://user-gold-cdn.xitu.io/2019/10/4/16d96dbec0f515bd?w=720&h=1280&f=gif&s=4784554)
+![最终效果](picture/最终效果.gif)
 视频存放路径信息：
 
-![视频存放信息](https://user-gold-cdn.xitu.io/2019/10/5/16d9a46a4c554cb8?w=1070&h=1143&f=png&s=115746)
+![视频存放信息](picture/视频存放信息.png)
 
 ## 五、参考资料
 * [Android: Camera相机开发详解(上) —— 知识储备](https://www.jianshu.com/p/f8d0d1467584)
