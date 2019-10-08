@@ -8,13 +8,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
@@ -53,7 +52,6 @@ public class CustomCameraActivity extends AppCompatActivity implements View.OnCl
     //闪光灯
     private TextView tv_flash;
 
-    //默认状态
     private static final int MODE_INIT = 0;
     //两个触摸点触摸屏幕状态
     private static final int MODE_ZOOM = 1;
@@ -86,6 +84,7 @@ public class CustomCameraActivity extends AppCompatActivity implements View.OnCl
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_customcamera);
+        getScreenBrightness();
         //绑定View
         initBind();
         //添加点击，触摸事件等监听
@@ -105,12 +104,10 @@ public class CustomCameraActivity extends AppCompatActivity implements View.OnCl
         cy_photo.setLayoutManager(layoutManager);
         cy_photo.setAdapter(mPhotosAdapter);
 
-
     }
     @Override
     public void onClick(View v) {
         switch (v.getId()){
-            //拍照
             case R.id.iv_photo:
                 cy_photo.setVisibility(cy_photo.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
                 break;
@@ -299,6 +296,18 @@ public class CustomCameraActivity extends AppCompatActivity implements View.OnCl
         }
         return true;
     }
+
+    /**
+     *
+     * 加入调整亮度
+     */
+    private void getScreenBrightness(){
+        WindowManager.LayoutParams lp = getWindow().getAttributes();
+        lp.screenBrightness = Float.valueOf(200) * (1f / 255f);
+        getWindow().setAttributes(lp);
+    }
+
+
 
     /**
      * 跳转到大图
