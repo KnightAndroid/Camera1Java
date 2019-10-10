@@ -1856,6 +1856,7 @@ private void getScreenBrightness(){
 }
 ```
 在`onCreate`调用即可，最后效果如下：
+
 自定义相机效果如下：
 ![调整亮度_自定义](picture/调整亮度_自定义.png)
 调用系统相机效果如下：
