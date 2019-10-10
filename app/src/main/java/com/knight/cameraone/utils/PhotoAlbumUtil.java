@@ -114,7 +114,7 @@ public class PhotoAlbumUtil {
 
 
     /**
-     * 判断Uri是否是downlaod类型
+     * 判断Uri是否是download类型
      * @param uri
      * @return
      */

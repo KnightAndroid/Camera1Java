@@ -1841,15 +1841,35 @@ public void onClick(View v) {
 实际效果：
 
 ![闪光灯效果](picture/闪光灯效果.gif)
+#### 3.13.调整亮度
+到这里可以发现，相比于调用系统拍照的清晰度，自定义拍照就逊色一筹，感觉上面有一层蒙版罩着。调用系统拍照可以发现，屏幕亮度故意调亮，那么是不是把自定义拍照的界面亮度调大，效果清晰度会不会好一些呢，下面试试，在`CustomCameraActivity`加入：
+```java
+/**
+ *
+ * 加入调整亮度
+ */
+private void getScreenBrightness(){
+    WindowManager.LayoutParams lp = getWindow().getAttributes();
+    //screenBrightness的值是0.0-1.0 从0到1.0 亮度逐渐增大 如果是-1，那就是跟随系统亮度 这里调成 0.78左右
+    lp.screenBrightness = Float.valueOf(200) * (1f / 255f);
+    getWindow().setAttributes(lp);
+}
+```
+在`onCreate`调用即可，最后效果如下：
+自定义相机效果如下：
+![调整亮度_自定义](picture/调整亮度_自定义.png)
+调用系统相机效果如下：
 
+![调整亮度_调用系统相机](picture/调整亮度_调用系统相机.png)
+效果确实比之前好多了。
 
-#### 3.13.视频录制
+#### 3.14.视频录制
 下面简单实现录制视频的功能，利用`MediaRecorder`来实现直接录制视频，这里要注意：MediaRecorder是不能对每一帧数据做处理的，录制视频需要用到以下工具：
 * MediaRecorder：视频编码的封装
 * camera：视频画面原属数据采集
 * SurfaceView：提供预览画面
 
-##### 3.13.1.MediaRecorder基本介绍
+##### 3.14.1.MediaRecorder基本介绍
 >MediaRecorder是Android中面向应用层的封装，用于提供音视频编码的封装操作的工具，下面直接上官方图：
 
 ![官方MediaRecorder生命周期图](picture/MediaRecorder官方生命周期图.png)
@@ -1863,7 +1883,7 @@ public void onClick(View v) {
 * `error`:当录制过程中发生错误，就会进入该状态，调用`reset()`回到`Initial`状态。
 * `release`:释放系统资源，只有在`Initial`状态才能调用`release()`回到该状态。
 
-##### 3.13.2.调整输出视频尺寸的宽高
+##### 3.14.2.调整输出视频尺寸的宽高
 **注意**：要添加录音权限，这里不在讲述。
 ```java
 /**
@@ -1935,7 +1955,7 @@ public void getVideoSize(){
         }
 ```
 
-##### 3.13.3.设置MediaRecorder参数
+##### 3.14.3.设置MediaRecorder参数
 ```java
     //解锁Camera硬件
     mCamera.unlock();
@@ -1958,7 +1978,7 @@ public void getVideoSize(){
     mediaRecorder.setVideoFrameRate(24);
 ```
 
-##### 3.13.4.调整保存视频角度
+##### 3.14.4.调整保存视频角度
 如果不设置调整保存视频的角度，用后置录制视频会逆时针翻转90度，所以需要设置输出顺时针旋转90度：
 ```java
     //调整视频旋转角度 如果不设置 后置和前置都会被旋转播放
@@ -2036,7 +2056,7 @@ public void startRecord(String path,String name){
 }
 ```
 
-##### 3.13.5.停止录制
+##### 3.14.5.停止录制
 当停止录制后需要把`MediaRecorder`释放，并且重新调用预览方法：
 ```java
 /**
@@ -2058,12 +2078,12 @@ public void stopRecord(){
 }
 ```
 
-##### 3.13.6.具体调用
+##### 3.14.6.具体调用
 ```java
 mCameraPresenter.startRecord(Configuration.OUTPATH,"video");
 ```
 
-##### 3.13.7.视频播放
+##### 3.14.7.视频播放
 当录制完需要播放，用新的界面来，用`SurfaceView`+`MediaPlayer`来实现：
 ```java
 public class PlayAudioActivity extends AppCompatActivity implements MediaPlayer.OnCompletionListener,MediaPlayer.OnPreparedListener{

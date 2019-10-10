@@ -303,6 +303,7 @@ public class CustomCameraActivity extends AppCompatActivity implements View.OnCl
      */
     private void getScreenBrightness(){
         WindowManager.LayoutParams lp = getWindow().getAttributes();
+        //screenBrightness的值是0.0-1.0 从0到1.0 亮度逐渐增大 如果是-1，那就是跟随系统亮度
         lp.screenBrightness = Float.valueOf(200) * (1f / 255f);
         getWindow().setAttributes(lp);
     }
