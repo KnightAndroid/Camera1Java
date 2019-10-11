@@ -11,6 +11,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
+    <com.knight.cameraone.view.FaceDeteView
+        android:id="@+id/faceView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
 
     <TextView
         android:id="@+id/tv_change_camera"
@@ -22,6 +27,18 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         />
+
+
+
+    <TextView
+        android:id="@+id/tv_facedetect"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@drawable/icon_facedetect_off"
+        app:layout_constraintTop_toBottomOf="@id/tv_change_camera"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginRight="15dp"
+        android:layout_marginTop="10dp"/>
 
     <TextView
         android:id="@+id/tv_flash"

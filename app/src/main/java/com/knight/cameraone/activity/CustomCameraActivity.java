@@ -25,6 +25,7 @@ import com.knight.cameraone.R;
 import com.knight.cameraone.adapter.PhotosAdapter;
 import com.knight.cameraone.utils.SystemUtil;
 import com.knight.cameraone.utils.ToastUtil;
+import com.knight.cameraone.view.FaceDeteView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +52,10 @@ public class CustomCameraActivity extends AppCompatActivity implements View.OnCl
     private TextView tv_change_camera;
     //闪光灯
     private TextView tv_flash;
+    //开启关闭人脸识别按钮
+    private TextView tv_facedetect;
+    //人脸识别框
+    private FaceDeteView faceView;
 
     private static final int MODE_INIT = 0;
     //两个触摸点触摸屏幕状态
@@ -72,9 +77,10 @@ public class CustomCameraActivity extends AppCompatActivity implements View.OnCl
     //图片List
     private List<String> photoList;
     private boolean isMove = false;
-
+    //闪光灯开关
     private boolean isTurn = true;
-
+    //开启人脸识别
+    private boolean isFaceDetect = true;
 
 
 
@@ -95,6 +101,8 @@ public class CustomCameraActivity extends AppCompatActivity implements View.OnCl
         mCameraPresenter.setFrontOrBack(Camera.CameraInfo.CAMERA_FACING_BACK);
         //添加监听
         mCameraPresenter.setCameraCallBack(this);
+        //添加人脸检测
+        mCameraPresenter.setFaceView(faceView);
 
         photoList = new ArrayList<>();
         mPhotosAdapter = new PhotosAdapter(photoList);
@@ -120,6 +128,13 @@ public class CustomCameraActivity extends AppCompatActivity implements View.OnCl
                 mCameraPresenter.turnLight(isTurn);
                 tv_flash.setBackgroundResource(isTurn ? R.drawable.icon_turnon : R.drawable.icon_turnoff);
                 isTurn = !isTurn;
+                break;
+            //开启人脸识别
+            case R.id.tv_facedetect:
+                mCameraPresenter.turnFaceDetect(isFaceDetect);
+                tv_facedetect.setBackgroundResource(isFaceDetect ? R.drawable.icon_facedetect_on : R.drawable.icon_facedetect_off);
+                isFaceDetect = !isFaceDetect;
+                break;
             default:
                 break;
         }
@@ -135,6 +150,8 @@ public class CustomCameraActivity extends AppCompatActivity implements View.OnCl
         cy_photo = findViewById(R.id.cy_photo);
         tv_change_camera = findViewById(R.id.tv_change_camera);
         tv_flash = findViewById(R.id.tv_flash);
+        tv_facedetect = findViewById(R.id.tv_facedetect);
+        faceView = findViewById(R.id.faceView);
     }
 
 
@@ -175,6 +192,7 @@ public class CustomCameraActivity extends AppCompatActivity implements View.OnCl
                 startActivity(new Intent(CustomCameraActivity.this,PlayAudioActivity.class));
             }
         });
+        tv_facedetect.setOnClickListener(this);
     }
 
 

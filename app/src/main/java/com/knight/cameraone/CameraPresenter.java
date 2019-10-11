@@ -16,10 +16,12 @@ import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 
 import com.knight.cameraone.utils.SystemUtil;
 import com.knight.cameraone.utils.ThreadPoolUtil;
 import com.knight.cameraone.utils.ToastUtil;
+import com.knight.cameraone.view.FaceDeteView;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -71,6 +73,9 @@ public class CameraPresenter implements Camera.PreviewCallback {
     //录制视频的videoSize
     private int height,width;
 
+    //检测头像的FaceView
+    private FaceDeteView mFaceView;
+
 
     //自定义回调
     public interface CameraCallBack {
@@ -106,6 +111,15 @@ public class CameraPresenter implements Camera.PreviewCallback {
         //创建文件夹目录
         setUpFile();
         init();
+    }
+
+    /**
+     *
+     * 人脸检测设置检测的View 矩形框
+     * @param mFaceView
+     */
+    public void setFaceView(FaceDeteView mFaceView){
+        this.mFaceView = mFaceView;
     }
 
 
@@ -471,7 +485,8 @@ public class CameraPresenter implements Camera.PreviewCallback {
         mCamera.setFaceDetectionListener(new Camera.FaceDetectionListener() {
             @Override
             public void onFaceDetection(Camera.Face[] faces, Camera camera) {
-                mCameraCallBack.onFaceDetect(transForm(faces), camera);
+          //      mCameraCallBack.onFaceDetect(transForm(faces), camera);
+                mFaceView.setFace(transForm(faces));
                 Log.d("sssd", "检测到" + faces.length + "人脸");
             }
         });
@@ -497,7 +512,8 @@ public class CameraPresenter implements Camera.PreviewCallback {
             matrix.setScale(1f, 1f);
         }
         matrix.postRotate(Float.valueOf(orientation));
-        matrix.postScale(mSurfaceView.getWidth() / 2f, mSurfaceView.getHeight() / 2f);
+        matrix.postScale(mSurfaceView.getWidth() / 2000f,mSurfaceView.getHeight() / 2000f);
+        matrix.postTranslate(mSurfaceView.getWidth() / 2f, mSurfaceView.getHeight() / 2f);
         ArrayList<RectF> arrayList = new ArrayList<>();
         for (Camera.Face rectF : faces) {
             RectF srcRect = new RectF(rectF.rect);
@@ -934,6 +950,17 @@ public class CameraPresenter implements Camera.PreviewCallback {
         parameters.setFlashMode(turnSwitch ? Camera.Parameters.FLASH_MODE_TORCH : Camera.Parameters.FLASH_MODE_OFF);
         mCamera.setParameters(parameters);
     }
+
+
+    /**
+     * 开启人脸识别
+     *
+     */
+    public void turnFaceDetect(boolean isDetect){
+         mFaceView.setVisibility(isDetect ?  View.VISIBLE : View.GONE);
+    }
+
+
 
 
 }
