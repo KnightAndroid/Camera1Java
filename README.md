@@ -2172,6 +2172,245 @@ public class PlayAudioActivity extends AppCompatActivity implements MediaPlayer.
 
 ![视频存放信息](picture/视频存放信息.png)
 
+#### 3.15.人脸检测
+下面实现人脸检测，注意是人脸检测不是人脸识别，步骤如下：
+* 在相机预览后，调用startFaceDetection方法开启人脸检测
+* 调用setFaceDetectionListener(FaceDetectionListener listener)设置人脸检测回调
+* 自定义View，用来绘制人脸大致区域
+* 在人脸回调中，所获取的人脸信息传递给自定义View，自定义View根据人脸信息绘制大致区域
+
+##### 3.15.1.开启人脸检测
+在相机调用开启预览后才能调用：
+```java
+/**
+ * 开始预览
+ */
+private void startPreview() {
+    try {
+        //根据所传入的SurfaceHolder对象来设置实时预览
+        mCamera.setPreviewDisplay(mSurfaceHolder);
+        //调整预览角度
+        setCameraDisplayOrientation(mAppCompatActivity,mCameraId,mCamera);
+        mCamera.startPreview();
+        //开启人脸检测
+        startFaceDetect();
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+}
+```
+##### 3.15.2.设置人脸检测回调
+```java
+/**
+ * 人脸检测
+ */
+private void startFaceDetect() {
+    //开始人脸检测，这个要调用startPreview之后调用
+    mCamera.startFaceDetection();
+    //添加回调
+    mCamera.setFaceDetectionListener(new Camera.FaceDetectionListener() {
+        @Override
+        public void onFaceDetection(Camera.Face[] faces, Camera camera) {
+      //      mCameraCallBack.onFaceDetect(transForm(faces), camera);
+            mFaceView.setFace(transForm(faces));
+            Log.d("sssd", "检测到" + faces.length + "人脸");
+            for(int i = 0;i < faces.length;i++){
+                Log.d("第"+(i+1)+"张人脸","分数"+faces[i].score+"左眼"+faces[i].leftEye+"右眼"+faces[i].rightEye+"嘴巴"+faces[i].mouth);
+            }
+        }
+    });
+}
+```
+在`Face`源码中，可以看到这么一段描述：
+>
+          Bounds of the face. (-1000, -1000) represents the top-left of the
+          camera field of view, and (1000, 1000) represents the bottom-right of
+          the field of view. For example, suppose the size of the viewfinder UI
+          is 800x480. The rect passed from the driver is (-1000, -1000, 0, 0).
+          The corresponding viewfinder rect should be (0, 0, 400, 240). It is
+          guaranteed left < right and top < bottom. The coordinates can be
+          smaller than -1000 or bigger than 1000. But at least one vertex will
+          be within (-1000, -1000) and (1000, 1000).
+
+          <p>The direction is relative to the sensor orientation, that is, what
+          the sensor sees. The direction is not affected by the rotation or
+          mirroring of {@link #setDisplayOrientation(int)}. The face bounding
+          rectangle does not provide any information about face orientation.</p>
+
+          <p>Here is the matrix to convert driver coordinates to View coordinates
+          in pixels.</p>
+          <pre>
+          Matrix matrix = new Matrix();
+          CameraInfo info = CameraHolder.instance().getCameraInfo()[cameraId];
+          // Need mirror for front camera.
+          boolean mirror = (info.facing == CameraInfo.CAMERA_FACING_FRONT);
+          matrix.setScale(mirror ? -1 : 1, 1);
+          // This is the value for android.hardware.Camera.setDisplayOrientation.
+          matrix.postRotate(displayOrientation);
+          // Camera driver coordinates range from (-1000, -1000) to (1000, 1000).
+          // UI coordinates range from (0, 0) to (width, height).
+          matrix.postScale(view.getWidth() / 2000f, view.getHeight() / 2000f);
+          matrix.postTranslate(view.getWidth() / 2f, view.getHeight() / 2f);
+          </pre>
+
+          @see #startFaceDetection()
+
+
+具体意思是在人脸使用的坐标和安卓屏幕坐标是不一样的，并且举了一个例子：如果屏幕尺寸是800*480，现在有一个矩形位置在人脸坐标系中位置是(-1000,-1000,0,0)，那么在安卓屏幕坐标的位置是(0,0,400,240)。
+
+并且给了转换坐标的具体方法：
+```java
+/**
+ * 将相机中用于表示人脸矩形的坐标转换成UI页面的坐标
+ *
+ * @param faces 人脸数组
+ * @return
+ */
+private ArrayList<RectF> transForm(Camera.Face[] faces) {
+    Matrix matrix = new Matrix();
+    boolean mirror;
+    if (mCameraId == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+        mirror = true;
+    } else {
+        mirror = false;
+    }
+    //前置需要镜像
+    if (mirror) {
+        matrix.setScale(-1f, 1f);
+    } else {
+        matrix.setScale(1f, 1f);
+    }
+    //后乘旋转角度
+    matrix.postRotate(Float.valueOf(orientation));
+    //后乘缩放
+    matrix.postScale(mSurfaceView.getWidth() / 2000f,mSurfaceView.getHeight() / 2000f);
+    //再进行位移
+    matrix.postTranslate(mSurfaceView.getWidth() / 2f, mSurfaceView.getHeight() / 2f);
+    ArrayList<RectF> arrayList = new ArrayList<>();
+    for (Camera.Face rectF : faces) {
+        RectF srcRect = new RectF(rectF.rect);
+        RectF dstRect = new RectF(0f, 0f, 0f, 0f);
+        //通过Matrix映射 将srcRect放入dstRect中
+        matrix.mapRect(dstRect, srcRect);
+        arrayList.add(dstRect);
+    }
+    return arrayList;
+
+}
+```
+
+##### 3.15.3.实现自定义View
+```java
+package com.knight.cameraone.view;
+
+import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.RectF;
+import android.support.annotation.Nullable;
+import android.util.AttributeSet;
+import android.util.TypedValue;
+import android.view.View;
+
+import java.util.ArrayList;
+
+/**
+ * @author created by knight
+ * @organize
+ * @Date 2019/10/11 13:54
+ * @descript:人脸框
+ */
+
+public class FaceDeteView extends View {
+
+    private Paint mPaint;
+    private String mColor = "#42ed45";
+    private ArrayList<RectF> mFaces = null;
+    public FaceDeteView(Context context) {
+        super(context);
+        init(context);
+    }
+
+    public FaceDeteView(Context context, @Nullable AttributeSet attrs) {
+        super(context, attrs);
+        init(context);
+    }
+
+    public FaceDeteView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        init(context);
+    }
+
+
+
+    private void init(Context context){
+        mPaint = new Paint();
+        //画笔颜色
+        mPaint.setColor(Color.parseColor(mColor));
+        //只绘制图形轮廓
+        mPaint.setStyle(Paint.Style.STROKE);
+        //设置粗细
+        mPaint.setStrokeWidth(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,1f,context.getResources().getDisplayMetrics()));
+        //设置抗锯齿
+        mPaint.setAntiAlias(true);
+    }
+
+
+    @Override
+    protected void onDraw(Canvas canvas){
+        super.onDraw(canvas);
+        if(mFaces != null){
+            for(RectF face:mFaces){
+                canvas.drawRect(face,mPaint);
+            }
+
+        }
+    }
+
+
+    /**
+     * 设置人人脸信息
+     */
+    public void setFace(ArrayList<RectF> mFaces){
+       this.mFaces = mFaces;
+       //重绘矩形框
+       invalidate();
+    }
+
+}
+
+```
+布局文件：
+```xml
+    <SurfaceView
+        android:id="@+id/sf_camera"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+    <!-- 新增 -->
+    <com.knight.cameraone.view.FaceDeteView
+        android:id="@+id/faceView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+```
+并增加人脸检测开关：
+```java
+    /**
+     * 开启人脸检测
+     *
+     */
+    public void turnFaceDetect(boolean isDetect){
+         mFaceView.setVisibility(isDetect ?  View.VISIBLE : View.GONE);
+    }
+```
+这里只是将自定义View不显示，具体效果图如下：
+
+![人脸检测效果图](picture/人脸检测效果图.gif)
+查看具体打印数据：
+
+![人脸检测数据](picture/人脸数据.png)
+可以发现在`vivo`安卓7.1.1版本下，眼睛，嘴巴数据是获取不到的。
+
 ## 五、参考资料
 * [Android: Camera相机开发详解(上) —— 知识储备](https://www.jianshu.com/p/f8d0d1467584)
 * [Android Camera基本用法一](https://blog.csdn.net/u010126792/article/details/86529646)
