@@ -2414,7 +2414,7 @@ public class FaceDeteView extends View {
 ## 五、参考资料
 * [Android: Camera相机开发详解(上) —— 知识储备](https://www.jianshu.com/p/f8d0d1467584)
 * [Android Camera基本用法一](https://blog.csdn.net/u010126792/article/details/86529646)
-
+* [Android: Camera相机开发详解(下) —— 实现人脸检测功能](https://www.jianshu.com/p/3bb301c302e8)
 
 
 
