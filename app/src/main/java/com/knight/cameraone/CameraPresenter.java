@@ -218,7 +218,7 @@ public class CameraPresenter implements Camera.PreviewCallback {
                 if (mCamera != null) {
                     mCamera.setPreviewCallback(this);
                 }
-            } catch (Exception e) {
+             } catch (Exception e) {
                 e.printStackTrace();
                 ToastUtil.showShortToast(mAppCompatActivity, "打开相机失败~");
                 return false;
@@ -469,6 +469,7 @@ public class CameraPresenter implements Camera.PreviewCallback {
             //调整预览角度
             setCameraDisplayOrientation(mAppCompatActivity,mCameraId,mCamera);
             mCamera.startPreview();
+            //开启人脸检测
             startFaceDetect();
         } catch (IOException e) {
             e.printStackTrace();
@@ -479,7 +480,7 @@ public class CameraPresenter implements Camera.PreviewCallback {
      * 人脸检测
      */
     private void startFaceDetect() {
-        //开始人脸识别，这个要调用startPreview之后调用
+        //开始人脸检测，这个要调用startPreview之后调用
         mCamera.startFaceDetection();
         //添加回调
         mCamera.setFaceDetectionListener(new Camera.FaceDetectionListener() {
@@ -488,6 +489,9 @@ public class CameraPresenter implements Camera.PreviewCallback {
           //      mCameraCallBack.onFaceDetect(transForm(faces), camera);
                 mFaceView.setFace(transForm(faces));
                 Log.d("sssd", "检测到" + faces.length + "人脸");
+                for(int i = 0;i < faces.length;i++){
+                    Log.d("第"+(i+1)+"张人脸","分数"+faces[i].score+"左眼"+faces[i].leftEye+"右眼"+faces[i].rightEye+"嘴巴"+faces[i].mouth);
+                }
             }
         });
     }
@@ -506,18 +510,23 @@ public class CameraPresenter implements Camera.PreviewCallback {
         } else {
             mirror = false;
         }
+        //前置需要镜像
         if (mirror) {
             matrix.setScale(-1f, 1f);
         } else {
             matrix.setScale(1f, 1f);
         }
+        //后乘旋转角度
         matrix.postRotate(Float.valueOf(orientation));
+        //后乘缩放
         matrix.postScale(mSurfaceView.getWidth() / 2000f,mSurfaceView.getHeight() / 2000f);
+        //再进行位移
         matrix.postTranslate(mSurfaceView.getWidth() / 2f, mSurfaceView.getHeight() / 2f);
         ArrayList<RectF> arrayList = new ArrayList<>();
         for (Camera.Face rectF : faces) {
             RectF srcRect = new RectF(rectF.rect);
             RectF dstRect = new RectF(0f, 0f, 0f, 0f);
+            //通过Matrix映射 将srcRect放入dstRect中
             matrix.mapRect(dstRect, srcRect);
             arrayList.add(dstRect);
         }
@@ -619,8 +628,6 @@ public class CameraPresenter implements Camera.PreviewCallback {
             //停止预览
             mCamera.stopPreview();
             mCamera.setPreviewCallback(null);
-            //释放相机资源
-            mCamera.unlock();
             mCamera.release();
             mCamera = null;
             mHandler.removeMessages(1);
@@ -698,7 +705,7 @@ public class CameraPresenter implements Camera.PreviewCallback {
                     //将图片保存到手机相册
                     SystemUtil.saveAlbum(Configuration.insidePath + file.getName(), file.getName(), mAppCompatActivity);
                     //将图片复制到外部
-                    SystemUtil.coptPicture(Configuration.insidePath + file.getName(),Configuration.OUTPATH,file.getName());
+                    SystemUtil.copyPicture(Configuration.insidePath + file.getName(),Configuration.OUTPATH,file.getName());
                     Message message = new Message();
                     message.what = 1;
                     message.obj = Configuration.insidePath + file.getName();
@@ -808,7 +815,7 @@ public class CameraPresenter implements Camera.PreviewCallback {
         int fitSize_width=0,fitSize_height=0;
         int fitSize_widthBig=0,fitSize_heightBig=0;
         Camera.Parameters parameters = mCamera.getParameters();
-        //得到系统支持视频格式
+        //得到系统支持视频尺寸
         List<Camera.Size> videoSize = parameters.getSupportedVideoSizes();
         for(int i = 0;i < videoSize.size();i++){
             int w = videoSize.get(i).width;
@@ -879,6 +886,9 @@ public class CameraPresenter implements Camera.PreviewCallback {
     public void startRecord(String path,String name){
         //解锁Camera硬件
         mCamera.unlock();
+        if(mediaRecorder == null){
+            mediaRecorder = new MediaRecorder();
+        }
         mediaRecorder.setCamera(mCamera);
         //音频源 麦克风
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
@@ -953,7 +963,7 @@ public class CameraPresenter implements Camera.PreviewCallback {
 
 
     /**
-     * 开启人脸识别
+     * 开启人脸检测
      *
      */
     public void turnFaceDetect(boolean isDetect){

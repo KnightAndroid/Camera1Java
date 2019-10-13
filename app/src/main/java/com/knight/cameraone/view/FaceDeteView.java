@@ -13,10 +13,10 @@ import android.view.View;
 import java.util.ArrayList;
 
 /**
- * @author created by luguian
+ * @author created by knight
  * @organize
  * @Date 2019/10/11 13:54
- * @descript:
+ * @descript:人脸框
  */
 
 public class FaceDeteView extends View {
@@ -43,9 +43,13 @@ public class FaceDeteView extends View {
 
     private void init(Context context){
         mPaint = new Paint();
+        //画笔颜色
         mPaint.setColor(Color.parseColor(mColor));
+        //只绘制图形轮廓
         mPaint.setStyle(Paint.Style.STROKE);
+        //设置粗细
         mPaint.setStrokeWidth(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,1f,context.getResources().getDisplayMetrics()));
+        //设置抗锯齿
         mPaint.setAntiAlias(true);
     }
 
@@ -67,14 +71,8 @@ public class FaceDeteView extends View {
      */
     public void setFace(ArrayList<RectF> mFaces){
        this.mFaces = mFaces;
+       //重绘矩形框
        invalidate();
     }
-
-
-
-
-
-
-
 
 }

@@ -54,7 +54,7 @@ public class CustomCameraActivity extends AppCompatActivity implements View.OnCl
     private TextView tv_flash;
     //开启关闭人脸识别按钮
     private TextView tv_facedetect;
-    //人脸识别框
+    //人脸检测框
     private FaceDeteView faceView;
 
     private static final int MODE_INIT = 0;
@@ -103,6 +103,8 @@ public class CustomCameraActivity extends AppCompatActivity implements View.OnCl
         mCameraPresenter.setCameraCallBack(this);
         //添加人脸检测
         mCameraPresenter.setFaceView(faceView);
+        //默认关闭人脸检测
+        mCameraPresenter.turnFaceDetect(false);
 
         photoList = new ArrayList<>();
         mPhotosAdapter = new PhotosAdapter(photoList);
@@ -129,7 +131,7 @@ public class CustomCameraActivity extends AppCompatActivity implements View.OnCl
                 tv_flash.setBackgroundResource(isTurn ? R.drawable.icon_turnon : R.drawable.icon_turnoff);
                 isTurn = !isTurn;
                 break;
-            //开启人脸识别
+            //开启人脸检测
             case R.id.tv_facedetect:
                 mCameraPresenter.turnFaceDetect(isFaceDetect);
                 tv_facedetect.setBackgroundResource(isFaceDetect ? R.drawable.icon_facedetect_on : R.drawable.icon_facedetect_off);

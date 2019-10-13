@@ -28,7 +28,7 @@ public class PlayAudioActivity extends AppCompatActivity implements MediaPlayer.
         player = new MediaPlayer();
         player.setOnCompletionListener(this);
         player.setOnPreparedListener(this);
-        //设置数据数据源，也就播放文件地址，可以是网络地址
+        //设置数据源，也就是播放文件地址，可以是网络地址
         String dataPath = Configuration.OUTPATH + "/videomp4";
         try {
             player.setDataSource(dataPath);
@@ -74,7 +74,7 @@ public class PlayAudioActivity extends AppCompatActivity implements MediaPlayer.
     }
 
     /**
-     * 这边播放
+     * 准备播放
      * @param mp
      */
     @Override

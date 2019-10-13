@@ -55,7 +55,7 @@ public class SystemUtil {
     }
 
     /**
-     * 格式化代码
+     * 格式化时间
      * @param time 时间
      * @param file 文件命名
      * @return
@@ -109,7 +109,7 @@ public class SystemUtil {
      * @param dstPath 外部路径
      * @param name 名字
      */
-    public static void coptPicture(String srcPath,String dstPath,String name){
+    public static void copyPicture(String srcPath,String dstPath,String name){
         //源文件流
         FileInputStream fileInputStream = null;
         //结果流
