@@ -241,7 +241,7 @@ public class CameraPresenter implements Camera.PreviewCallback {
             mParameters = camera.getParameters();
             //设置预览格式
             mParameters.setPreviewFormat(ImageFormat.NV21);
-            mParameters.setExposureCompensation(5);
+          //  mParameters.setExposureCompensation(5);
             setPreviewSize();
             setPictureSize();
             //连续自动对焦图像

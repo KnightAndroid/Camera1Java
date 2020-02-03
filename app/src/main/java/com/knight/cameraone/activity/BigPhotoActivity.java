@@ -2,6 +2,7 @@ package com.knight.cameraone.activity;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
@@ -27,5 +28,10 @@ public class BigPhotoActivity extends AppCompatActivity {
                 .override(iv_photo.getWidth(),iv_photo.getHeight())
                 .error(R.drawable.default_person_icon))
                 .into(iv_photo);
+
+        Integer number1 = 1;
+
+        Log.d("测试","1".equals(number1)+"");//输出false
+
     }
 }
