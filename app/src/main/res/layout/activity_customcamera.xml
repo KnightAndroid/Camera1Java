@@ -3,13 +3,33 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:id="@+id/cl_parent">
 
 
     <SurfaceView
         android:id="@+id/sf_camera"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintDimensionRatio="3:4"
+        app:layout_constraintTop_toTopOf="parent"
+
+        />
+
+
+    <ImageView
+        android:id="@+id/iv_test"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintDimensionRatio="3:4"
+        app:layout_constraintTop_toTopOf="parent"
+        android:background="@drawable/test"
+        android:visibility="gone"
+        />
 
     <com.knight.cameraone.view.FaceDeteView
         android:id="@+id/faceView"
@@ -49,6 +69,20 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         android:background="@drawable/icon_turnoff"/>
+
+
+    <TextView
+        android:id="@+id/tv_matchorwrap"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="全屏模式"
+        app:layout_constraintTop_toBottomOf="@id/tv_flash"
+        android:textColor="#FFFFFF"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+
+        />
 
 
     <android.support.v7.widget.RecyclerView

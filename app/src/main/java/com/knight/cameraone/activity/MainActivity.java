@@ -1,6 +1,9 @@
 package com.knight.cameraone.activity;
 
 import android.Manifest;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -52,6 +55,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         initBind();
         initListener();
         checkNeedPermissions();
+
+
+
+
+        //test();
     }
 
 
@@ -217,6 +225,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         }
         super.onActivityResult(requestCode, resultCode, data);
+
+    }
+
+
+
+
+
+    private void test(){
+        ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+
+        ClipData clipData = cm.getPrimaryClip();
+        clipData.toString();
+
+
+
+        // 创建普通字符型
+        ClipData clipData1 = ClipData.newPlainText("Label","测试");
+        clipData1.toString();
+
+        //将ClipData内容放到系统剪贴板里
+        cm.setPrimaryClip(clipData1);
+
+
 
     }
 

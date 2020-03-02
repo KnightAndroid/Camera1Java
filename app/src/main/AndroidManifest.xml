@@ -53,6 +53,9 @@
         <activity
             android:name=".activity.BigPhotoActivity"
             android:screenOrientation="portrait" />
+
+        <activity android:name=".activity.TestActivity"
+            android:screenOrientation="portrait"/>
     </application>
 
 </manifest>

@@ -1,22 +1,32 @@
 package com.knight.cameraone;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
+import android.graphics.Point;
 import android.graphics.RectF;
+import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraManager;
+import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.MediaRecorder;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.Size;
+import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.WindowManager;
 
 import com.knight.cameraone.utils.SystemUtil;
 import com.knight.cameraone.utils.ThreadPoolUtil;
@@ -77,6 +87,20 @@ public class CameraPresenter implements Camera.PreviewCallback {
     private FaceDeteView mFaceView;
 
 
+
+
+    private boolean isFull =false;
+
+    public boolean isFull() {
+        return isFull;
+    }
+
+    public void setFull(boolean full) {
+        isFull = full;
+    }
+
+
+
     //自定义回调
     public interface CameraCallBack {
         //预览帧回调
@@ -100,7 +124,7 @@ public class CameraPresenter implements Camera.PreviewCallback {
     public CameraPresenter(AppCompatActivity mAppCompatActivity, SurfaceView mSurfaceView) {
         this.mAppCompatActivity = mAppCompatActivity;
         this.mSurfaceView = mSurfaceView;
-        mSurfaceView.getHolder().setKeepScreenOn(true);
+      //  mSurfaceView.getHolder().setKeepScreenOn(true);
         mSurfaceHolder = mSurfaceView.getHolder();
         DisplayMetrics dm = new DisplayMetrics();
         mAppCompatActivity.getWindowManager().getDefaultDisplay().getMetrics(dm);
@@ -172,10 +196,11 @@ public class CameraPresenter implements Camera.PreviewCallback {
     /**
      * 初始化增加回调
      */
-    private void init() {
+    public void init() {
         mSurfaceHolder.addCallback(new SurfaceHolder.Callback() {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
+                Log.d("sssd-宽",mSurfaceView.getMeasuredWidth() + "*" +mSurfaceView.getMeasuredHeight());
                 //surface创建时执行
                 if (mCamera == null) {
                     openCamera(mCameraId);
@@ -241,8 +266,16 @@ public class CameraPresenter implements Camera.PreviewCallback {
             mParameters = camera.getParameters();
             //设置预览格式
             mParameters.setPreviewFormat(ImageFormat.NV21);
-          //  mParameters.setExposureCompensation(5);
-            setPreviewSize();
+            //mParameters.setExposureCompensation(2);
+
+            if(isFull){
+                setPreviewSize(screenWidth,screenHeight);
+            } else {
+                setPreviewSize(mSurfaceView.getMeasuredWidth(),mSurfaceView.getMeasuredHeight());
+            }
+
+            //getOpyimalPreviewSize();
+
             setPictureSize();
             //连续自动对焦图像
             if (isSupportFocus(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
@@ -251,6 +284,7 @@ public class CameraPresenter implements Camera.PreviewCallback {
                 //自动对焦(单次)
                 mParameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
             }
+
             //给相机设置参数
             mCamera.setParameters(mParameters);
         } catch (Exception e) {
@@ -313,7 +347,7 @@ public class CameraPresenter implements Camera.PreviewCallback {
     /**
      * 设置预览界面尺寸
      */
-    private void setPreviewSize() {
+    public void setPreviewSize(int width,int height) {
         //获取系统支持预览大小
         List<Camera.Size> localSizes = mParameters.getSupportedPreviewSizes();
         Camera.Size biggestSize = null;//最大分辨率
@@ -322,46 +356,155 @@ public class CameraPresenter implements Camera.PreviewCallback {
         Camera.Size targetSiz2 = null;// 没有屏幕分辨率就取跟屏幕分辨率相近(小)的size
         if (localSizes != null) {
             int cameraSizeLength = localSizes.size();
-            for (int n = 0; n < cameraSizeLength; n++) {
-                Camera.Size size = localSizes.get(n);
-                Log.d("sssd-系统支持的尺寸:",size.width + "*" +size.height);
-                if (biggestSize == null ||
-                        (size.width >= biggestSize.width && size.height >= biggestSize.height)) {
-                    biggestSize = size;
-                }
 
-                //如果支持的比例都等于所获取到的宽高
-                if (size.width == screenHeight
-                        && size.height == screenWidth) {
-                    fitSize = size;
-                    //如果任一宽或者高等于所支持的尺寸
-                } else if (size.width == screenHeight
-                        || size.height == screenWidth) {
-                    if (targetSize == null) {
-                        targetSize = size;
-                    //如果上面条件都不成立 如果任一宽高小于所支持的尺寸
-                    } else if (size.width < screenHeight
-                            || size.height < screenWidth) {
-                        targetSiz2 = size;
+            if(Float.valueOf(width) / height == 3.0f / 4){
+                for (int n = 0; n < cameraSizeLength; n++) {
+                    Camera.Size size = localSizes.get(n);
+                    //  Log.d("sssd-系统支持的尺寸size.width:",size.width + "*" +size.height);
+                    //  Log.d("sssd-系统",1440f / 1080+"");
+                    //  Log.d("sssd-系统支持的尺寸比:",Double.valueOf(size.width) / size.height+"");
+                    if(Float.valueOf(size.width) / size.height == 4.0f / 3){
+                        Log.d("sssd-系统支持的尺寸:","进入");
+                        mParameters.setPreviewSize(size.width,size.height);
+                        break;
+                    }
+
+
+                }
+            } else {
+                for (int n = 0; n < cameraSizeLength; n++) {
+                    Camera.Size size = localSizes.get(n);
+                    Log.d("sssd-系统支持的尺寸:",size.width + "*" +size.height);
+                    if (biggestSize == null ||
+                            (size.width >= biggestSize.width && size.height >= biggestSize.height)) {
+                        biggestSize = size;
+                    }
+
+                    //如果支持的比例都等于所获取到的宽高
+                    if (size.width == height
+                            && size.height == width) {
+                        fitSize = size;
+                        //如果任一宽或者高等于所支持的尺寸
+                    } else if (size.width == height
+                            || size.height == width) {
+                        if (targetSize == null) {
+                            targetSize = size;
+                            //如果上面条件都不成立 如果任一宽高小于所支持的尺寸
+                        } else if (size.width < height
+                                || size.height < width) {
+                            targetSiz2 = size;
+                        }
                     }
                 }
+
+                if (fitSize == null) {
+                    fitSize = targetSize;
+                }
+
+                if (fitSize == null) {
+                    fitSize = targetSiz2;
+                }
+
+                if (fitSize == null) {
+                    fitSize = biggestSize;
+                }
+                Log.d("sssd-最佳预览尺寸:",fitSize.width + "*" + fitSize.height);
+
+                //mParameters.setPreviewSize(640,480);
+                mParameters.setPreviewSize(fitSize.width, fitSize.height);
             }
 
-            if (fitSize == null) {
-                fitSize = targetSize;
-            }
 
-            if (fitSize == null) {
-                fitSize = targetSiz2;
-            }
 
-            if (fitSize == null) {
-                fitSize = biggestSize;
-            }
-            Log.d("sssd-最佳预览尺寸:",fitSize.width + "*" + fitSize.height);
-            mParameters.setPreviewSize(fitSize.width, fitSize.height);
+
+
         }
     }
+
+
+    /**
+     * 解决预览变形问题
+     *
+     *
+     */
+    private void getOpyimalPreviewSize(){
+        List<Camera.Size> sizes = mParameters.getSupportedPreviewSizes();
+        int w = screenWidth;
+        int h = screenHeight;
+        final double ASPECT_TOLERANCE = 0.1;
+        double targetRatio = (double) w / h;
+        if (sizes == null) return;
+
+        Camera.Size optimalSize = null;
+        double minDiff = Double.MAX_VALUE;
+
+        int targetHeight = h;
+        for(Camera.Size size : sizes){
+            double ratio = (double) size.width / size.height;
+            if(Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE) continue;;
+            if(Math.abs(size.height - targetHeight) < minDiff){
+                optimalSize = size;
+                minDiff = Math.abs(size.height - targetHeight);
+            }
+
+        }
+
+
+        if(optimalSize == null){
+            minDiff = Double.MAX_VALUE;
+            for(Camera.Size size : sizes){
+                if(Math.abs(size.height - targetHeight) < minDiff){
+                    optimalSize = size;
+                    minDiff = Math.abs(size.height - targetHeight);
+                }
+            }
+
+        }
+
+        mParameters.setPreviewSize(optimalSize.width,optimalSize.height);
+    }
+
+
+
+
+//    private Point screenResolution;
+//    private int mCameraPreviewWidth;
+//    private int mCameraPreviewHeight;
+//    //从底层拿camera支持的previewsize，完了和屏幕分辨率做差，diff最小的就是最佳预览分辨率
+//    private void getPreviewSize(int mCameraId) {
+//        try {
+//            int diffs = Integer.MAX_VALUE;
+//            WindowManager windowManager = (WindowManager) mAppCompatActivity.getSystemService(Context.WINDOW_SERVICE);
+//            Display display = windowManager.getDefaultDisplay();
+//            screenResolution = new Point(display.getWidth(), display.getHeight());
+//
+//            CameraCharacteristics props = mCameraManager.getCameraCharacteristics(mCameraId);
+//            StreamConfigurationMap configurationMap = props.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+//            Size[] availablePreviewSizes = configurationMap.getOutputSizes(SurfaceTexture.class);
+//
+//            for (Size previewSize : availablePreviewSizes) {
+//              //  Log.v(TAG, " PreviewSizes = " + previewSize);
+//                mCameraPreviewWidth = previewSize.getWidth();
+//                mCameraPreviewHeight = previewSize.getHeight();
+//                int newDiffs = Math.abs(mCameraPreviewWidth - screenResolution.x) + Math.abs(mCameraPreviewHeight - screenResolution.y);
+//              //  Log.v(TAG, "newDiffs = " + newDiffs);
+//
+//                if (newDiffs == 0) {
+//                    bestPreviewWidth = mCameraPreviewWidth;
+//                    bestPreviewHeight = mCameraPreviewHeight;
+//                    break;
+//                }
+//                if (diffs > newDiffs) {
+//                    bestPreviewWidth = mCameraPreviewWidth;
+//                    bestPreviewHeight = mCameraPreviewHeight;
+//                    diffs = newDiffs;
+//                }
+//            }
+//        } catch (CameraAccessException cae) {
+//
+//        }
+//    }
+
 
 
     /**
@@ -481,19 +624,19 @@ public class CameraPresenter implements Camera.PreviewCallback {
      */
     private void startFaceDetect() {
         //开始人脸检测，这个要调用startPreview之后调用
-        mCamera.startFaceDetection();
-        //添加回调
-        mCamera.setFaceDetectionListener(new Camera.FaceDetectionListener() {
-            @Override
-            public void onFaceDetection(Camera.Face[] faces, Camera camera) {
-          //      mCameraCallBack.onFaceDetect(transForm(faces), camera);
-                mFaceView.setFace(transForm(faces));
-                Log.d("sssd", "检测到" + faces.length + "人脸");
-                for(int i = 0;i < faces.length;i++){
-                    Log.d("第"+(i+1)+"张人脸","分数"+faces[i].score+"左眼"+faces[i].leftEye+"右眼"+faces[i].rightEye+"嘴巴"+faces[i].mouth);
-                }
-            }
-        });
+//        mCamera.startFaceDetection();
+//        //添加回调
+//        mCamera.setFaceDetectionListener(new Camera.FaceDetectionListener() {
+//            @Override
+//            public void onFaceDetection(Camera.Face[] faces, Camera camera) {
+//          //      mCameraCallBack.onFaceDetect(transForm(faces), camera);
+//                mFaceView.setFace(transForm(faces));
+//                Log.d("sssd", "检测到" + faces.length + "人脸");
+//                for(int i = 0;i < faces.length;i++){
+//                    Log.d("第"+(i+1)+"张人脸","分数"+faces[i].score+"左眼"+faces[i].leftEye+"右眼"+faces[i].rightEye+"嘴巴"+faces[i].mouth);
+//                }
+//            }
+//        });
     }
 
     /**
@@ -968,6 +1111,17 @@ public class CameraPresenter implements Camera.PreviewCallback {
      */
     public void turnFaceDetect(boolean isDetect){
          mFaceView.setVisibility(isDetect ?  View.VISIBLE : View.GONE);
+    }
+
+
+    /**
+     *
+     *
+     * @param mSurfaceView
+     */
+    public void update(SurfaceView mSurfaceView){
+        mSurfaceHolder = mSurfaceView.getHolder();
+
     }
 
 
