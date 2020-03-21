@@ -1048,7 +1048,7 @@ public class CameraPresenter implements Camera.PreviewCallback {
         Log.d("sssd视频宽高：","宽"+width+"高"+height+"");
         mediaRecorder.setVideoSize(width,height);
         //每秒的帧数
-        mediaRecorder.setVideoFrameRate(24);
+        mediaRecorder.setVideoFrameRate(20);
         //调整视频旋转角度 如果不设置 后置和前置都会被旋转播放
         if(mCameraId == Camera.CameraInfo.CAMERA_FACING_FRONT) {
             if(orientation == 270 || orientation == 90 || orientation == 180){
