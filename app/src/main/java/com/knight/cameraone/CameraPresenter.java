@@ -1,32 +1,22 @@
 package com.knight.cameraone;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
-import android.graphics.Point;
 import android.graphics.RectF;
-import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
-import android.hardware.camera2.CameraAccessException;
-import android.hardware.camera2.CameraCharacteristics;
-import android.hardware.camera2.CameraManager;
-import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.MediaRecorder;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.Size;
-import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.view.WindowManager;
 
 import com.knight.cameraone.utils.SystemUtil;
 import com.knight.cameraone.utils.ThreadPoolUtil;
@@ -787,6 +777,7 @@ public class CameraPresenter implements Camera.PreviewCallback {
      * 创建拍照照片文件夹
      */
     private void setUpFile() {
+        //这里是app的内部存储 这里要注意 不是外部私有目录 详情请看 Configuration这个类
         photosFile = new File(Configuration.insidePath);
         if (!photosFile.exists() || !photosFile.isDirectory()) {
             boolean isSuccess = false;
