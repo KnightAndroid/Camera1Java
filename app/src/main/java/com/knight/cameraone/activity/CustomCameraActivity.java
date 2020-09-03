@@ -1,6 +1,5 @@
 package com.knight.cameraone.activity;
 
-import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.content.Intent;
 import android.graphics.RectF;
@@ -12,17 +11,15 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.MotionEvent;
+import android.view.OrientationEventListener;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.animation.Animation;
 import android.view.animation.ScaleAnimation;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -111,11 +108,23 @@ public class CustomCameraActivity extends AppCompatActivity implements View.OnCl
     private int aftersufaceViewWidth;
     private int aftersurfaceViewHeight;
 
+    //增加传感器
+    private OrientationEventListener mOrientationEventListener;
+    //当前角度
+    private float mCurrentOrientation = 0f;
+    //拍照时的传感器方向
+    private int takePhotoOrientation = 0;
+
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
            supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
+        // 去掉通知栏
+     //   getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+      //          WindowManager.LayoutParams.FLAG_FULLSCREEN);//去掉信息栏
         setContentView(R.layout.activity_customcamera);
 
 
@@ -131,7 +140,7 @@ public class CustomCameraActivity extends AppCompatActivity implements View.OnCl
         //添加点击，触摸事件等监听
         initListener();
 
-
+        initOrientate();
         //初始化CameraPresenter
         mCameraPresenter = new CameraPresenter(this, sf_camera);
         //设置后置摄像头
@@ -143,6 +152,8 @@ public class CustomCameraActivity extends AppCompatActivity implements View.OnCl
         //默认关闭人脸检测
         mCameraPresenter.turnFaceDetect(false);
 
+      //  ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(screenHeight, ConstraintLayout.LayoutParams.WRAP_CONTENT);
+      //  sf_camera.setLayoutParams(layoutParams);
         photoList = new ArrayList<>();
         mPhotosAdapter = new PhotosAdapter(photoList);
         mPhotosAdapter.setOnItemClickListener(this);
@@ -269,7 +280,7 @@ public class CustomCameraActivity extends AppCompatActivity implements View.OnCl
             @Override
             public void onClick() {
                 //拍照的调用方法
-                mCameraPresenter.takePicture();
+                mCameraPresenter.takePicture(takePhotoOrientation);
             }
         });
 
@@ -305,6 +316,10 @@ public class CustomCameraActivity extends AppCompatActivity implements View.OnCl
         super.onDestroy();
         if (mCameraPresenter != null) {
             mCameraPresenter.releaseCamera();
+        }
+
+        if(mOrientationEventListener != null){
+            mOrientationEventListener.disable();
         }
     }
 
@@ -505,7 +520,7 @@ public class CustomCameraActivity extends AppCompatActivity implements View.OnCl
                     String s  = String.valueOf(animation.getAnimatedValue());
                  //   params.width = (int) (Float.valueOf(s) / 4.0f * 3);
                     view.setLayoutParams(params);
-                    Log.d("sssd-伸缩后的宽高",view.getMeasuredWidth() + "111"+ params.height +"");
+
 
                 }
 
@@ -515,6 +530,46 @@ public class CustomCameraActivity extends AppCompatActivity implements View.OnCl
             animator.start();
 
         }
+    }
+
+
+    /**
+     * 初始化传感器方向
+     *
+     *
+     */
+    private void  initOrientate(){
+        if(mOrientationEventListener == null){
+            mOrientationEventListener = new OrientationEventListener(CustomCameraActivity.this) {
+                @Override
+                public void onOrientationChanged(int orientation) {
+                    // i的范围是0-359
+                    // 屏幕左边在顶部的时候 i = 90;
+                    // 屏幕顶部在底部的时候 i = 180;
+                    // 屏幕右边在底部的时候 i = 270;
+                    // 正常的情况默认i = 0;
+                    if(45 <= orientation && orientation < 135){
+                        takePhotoOrientation = 180;
+                        mCurrentOrientation = -180;
+                    } else if(135 <= orientation && orientation < 225){
+                        takePhotoOrientation = 270;
+                        mCurrentOrientation = 90;
+                    } else if(225 <= orientation && orientation < 315){
+                        takePhotoOrientation = 0;
+                        mCurrentOrientation = 0;
+                    } else {
+                        takePhotoOrientation = 90;
+                        mCurrentOrientation = -90;
+                    }
+
+
+
+                }
+            };
+
+        }
+        mOrientationEventListener.enable();
+
     }
 
 

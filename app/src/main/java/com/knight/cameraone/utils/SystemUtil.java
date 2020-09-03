@@ -72,7 +72,7 @@ public class SystemUtil {
      * @param i 传入的数字
      * @return
      */
-    public String formatRandom(int i){
+    public static String formatRandom(int i){
         String s = i + "";
         if(s.length() == 1){
             return "000" + s;

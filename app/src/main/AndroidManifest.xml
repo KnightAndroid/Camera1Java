@@ -46,7 +46,7 @@
 
         <activity
             android:name=".activity.CustomCameraActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".activity.PlayAudioActivity"
             android:screenOrientation="portrait" />

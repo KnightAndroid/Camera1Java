@@ -8,6 +8,7 @@ import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.hardware.Camera;
 import android.media.MediaRecorder;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
@@ -18,6 +19,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 
+import com.knight.cameraone.utils.ImageUtil;
 import com.knight.cameraone.utils.SystemUtil;
 import com.knight.cameraone.utils.ThreadPoolUtil;
 import com.knight.cameraone.utils.ToastUtil;
@@ -152,7 +154,7 @@ public class CameraPresenter implements Camera.PreviewCallback {
     /**
      * 拍照
      */
-    public void takePicture() {
+    public void takePicture(final int takePhotoOrientation) {
         if (mCamera != null) {
             //拍照回调 点击拍照时回调 写一个空实现
             mCamera.takePicture(new Camera.ShutterCallback() {
@@ -175,7 +177,7 @@ public class CameraPresenter implements Camera.PreviewCallback {
                     //回调
                     mCameraCallBack.onTakePicture(data, camera);
                     //保存图片
-                    getPhotoPath(data);
+                    getPhotoPath(data,takePhotoOrientation);
 
                 }
             });
@@ -777,8 +779,10 @@ public class CameraPresenter implements Camera.PreviewCallback {
      * 创建拍照照片文件夹
      */
     private void setUpFile() {
-        //这里是app的内部存储 这里要注意 不是外部私有目录 详情请看 Configuration这个类
-        photosFile = new File(Configuration.insidePath);
+        //方式1 这里是app的内部存储 这里要注意 不是外部私有目录 详情请看 Configuration这个类
+       // photosFile = new File(Configuration.insidePath);
+        //方式2 这里改为app的外部存储 私有存储目录 /storage/emulated/0/Android/data/com.knight.cameraone/Pictures
+        photosFile = mAppCompatActivity.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         if (!photosFile.exists() || !photosFile.isDirectory()) {
             boolean isSuccess = false;
             try {
@@ -799,7 +803,7 @@ public class CameraPresenter implements Camera.PreviewCallback {
     /**
      * @return 返回路径
      */
-    private void getPhotoPath(final byte[] data) {
+    private void getPhotoPath(final byte[] data, final int takePhotoOrientation) {
         ThreadPoolUtil.execute(new Runnable() {
             @Override
             public void run() {
@@ -808,7 +812,7 @@ public class CameraPresenter implements Camera.PreviewCallback {
                 //拍照数量+1
                 photoNum++;
                 //图片名字
-                String name = SystemUtil.formatTime(timeMillis, SystemUtil.formatTime(photoNum) + ".jpg");
+                String name = SystemUtil.formatTime(timeMillis, SystemUtil.formatRandom(photoNum) + ".jpg");
                 //创建具体文件
                 File file = new File(photosFile, name);
                 if (!file.exists()) {
@@ -835,14 +839,20 @@ public class CameraPresenter implements Camera.PreviewCallback {
                     }
 
                     //将图片旋转
-                    rotateImageView(mCameraId,orientation,Configuration.insidePath + file.getName());
-                    //将图片保存到手机相册
-                    SystemUtil.saveAlbum(Configuration.insidePath + file.getName(), file.getName(), mAppCompatActivity);
-                    //将图片复制到外部
-                    SystemUtil.copyPicture(Configuration.insidePath + file.getName(),Configuration.OUTPATH,file.getName());
+                   // rotateImageView(mCameraId,orientation,Configuration.insidePath + file.getName());
+                    rotateImageView(mCameraId,takePhotoOrientation,file.getAbsolutePath());
+                    //将图片复制到外部 target SDK 设置 Android 10以下
+                    //SystemUtil.copyPicture(Configuration.insidePath + file.getName(),Configuration.OUTPATH,file.getName());
+
+                    //将图片保存到手机相册 方式1
+               //     SystemUtil.saveAlbum(file.getAbsolutePath(), file.getName(), mAppCompatActivity);
+                    //将图片保存到手机相册 方式2
+                    ImageUtil.saveAlbum(mAppCompatActivity,file);
+
+
                     Message message = new Message();
                     message.what = 1;
-                    message.obj = Configuration.insidePath + file.getName();
+                    message.obj = file.getAbsolutePath();
                     mHandler.sendMessage(message);
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
@@ -861,17 +871,24 @@ public class CameraPresenter implements Camera.PreviewCallback {
     private void rotateImageView(int cameraId,int orientation,String path){
         Bitmap bitmap = BitmapFactory.decodeFile(path);
         Matrix matrix = new Matrix();
+        matrix.postRotate(Float.valueOf(orientation));
         // 创建新的图片
         Bitmap resizedBitmap;
-        //0是后置
-        if(cameraId == 0){
-            if(orientation == 90){
-                matrix.postRotate(90);
-            }
-        }
-        //1是前置
+//        //0是后置
+//        if(cameraId == 0){
+//            if(orientation == 90){
+//                matrix.postRotate(90);
+//            }
+//        }
+//        //1是前置
+//        if(cameraId == 1){
+//            matrix.postRotate(270);
+//        }
+
         if(cameraId == 1){
-            matrix.postRotate(270);
+            if(orientation == 90){
+                matrix.postRotate(180f);
+            }
         }
         // 创建新的图片
         resizedBitmap = Bitmap.createBitmap(bitmap, 0, 0,
