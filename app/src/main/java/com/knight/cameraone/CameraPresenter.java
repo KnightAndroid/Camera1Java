@@ -1075,8 +1075,8 @@ public class CameraPresenter implements Camera.PreviewCallback {
             file.mkdirs();
         }
         //设置输出文件名字
-        mediaRecorder.setOutputFile(path + File.separator + name + "mp4");
-        File file1 = new File(path + File.separator + name + "mp4");
+        mediaRecorder.setOutputFile(path + File.separator + name + ".mp4");
+        File file1 = new File(path + File.separator + name + ".mp4");
         if(file1.exists()){
             file1.delete();
         }
