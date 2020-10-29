@@ -1,7 +1,5 @@
 package com.knight.cameraone;
 
-import android.os.Environment;
-
 /**
  * @author created by knight
  * @organize
@@ -35,5 +33,5 @@ public class Configuration {
 
     //例子: context.getExternalFilesDir(Environment.DIRECTORY_MOVIES) 就会在/storage/emulated/0/Android/data/com.knight.cameraone/files/Movies
     //外部路径 Android10以上Environment.getExternalStorageDirectory() 不能用
-    public static String OUTPATH = Environment.getExternalStorageDirectory() + "/拍照-相册/";
+    //public static String OUTPATH = Environment.getExternalStorageDirectory() + "/拍照-相册/";
 }
