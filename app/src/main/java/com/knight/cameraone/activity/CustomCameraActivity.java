@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.RectF;
 import android.hardware.Camera;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -27,7 +28,6 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.request.RequestOptions;
 import com.knight.cameraone.CameraPresenter;
 import com.knight.cameraone.CircleButtonView;
-import com.knight.cameraone.Configuration;
 import com.knight.cameraone.R;
 import com.knight.cameraone.adapter.PhotosAdapter;
 import com.knight.cameraone.utils.SystemUtil;
@@ -208,18 +208,6 @@ public class CustomCameraActivity extends AppCompatActivity implements View.OnCl
                 isFull = !isFull;
                 mCameraPresenter.setFull(isFull);
                 cl_parent.addView(sf_camera,0,layoutParams);
-
-//                scaleSurfaceView(sf_camera, isFull);
-//                if(isFull){
-//                    mCameraPresenter.setFull(false);
-//                    int s = screen[0] * 4/ 3;
-//                    Log.d("sss进入",screen[1]+ "sdsd" +s+"");
-//                    changeViewHeightAnimatorStart(sf_camera,screen[1],screen[0] * 4/3);
-//                } else {
-//                    mCameraPresenter.setFull(true);
-//                    changeViewHeightAnimatorStart(sf_camera,screen[0] * 4/3,screen[1]);
-//                }
-//                isFull = !isFull;
                 break;
             default:
                 break;
@@ -288,7 +276,10 @@ public class CustomCameraActivity extends AppCompatActivity implements View.OnCl
         tv_takephoto.setOnLongClickListener(new CircleButtonView.OnLongClickListener() {
             @Override
             public void onLongClick() {
-                mCameraPresenter.startRecord(Configuration.OUTPATH, "video");
+
+
+               // mCameraPresenter.startRecord(Configuration.OUTPATH, "video");
+                mCameraPresenter.startRecord(getExternalFilesDir(Environment.DIRECTORY_MOVIES).getPath(),"video");
 
             }
 
@@ -300,7 +291,8 @@ public class CustomCameraActivity extends AppCompatActivity implements View.OnCl
             @Override
             public void onRecordFinishedListener() {
                 mCameraPresenter.stopRecord();
-                startActivity(new Intent(CustomCameraActivity.this, PlayAudioActivity.class));
+                startActivity(new Intent(CustomCameraActivity.this, PlayAudioActivity.class)
+                   .putExtra("videoPath",mCameraPresenter.getVideoFilePath()));
             }
         });
         tv_facedetect.setOnClickListener(this);
@@ -368,6 +360,11 @@ public class CustomCameraActivity extends AppCompatActivity implements View.OnCl
                 .into(iv_photo);
         photoList.add(imagePath);
         mPhotosAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void getVideoFile(String videoFilePath) {
+
     }
 
 

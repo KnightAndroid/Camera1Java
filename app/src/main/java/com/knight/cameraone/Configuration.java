@@ -13,6 +13,7 @@ public class Configuration {
 
     //这是app内部存储 格式如下 /data/data/包名/xxx/ 内部存储在Android系统对应的根目录是 /data/data/，这个目录普通用户是无权访问的，用户需要root权限才可以查看
     public static String insidePath = "/data/data/com.knight.cameraone/pic/";
+
     //这是app外部存储的私有存储目录 沙盒模式(Android 10)
     //context.getExternalFilesDir(String type)
     /**
@@ -31,6 +32,8 @@ public class Configuration {
      *
      *
      */
-    //外部路径
+
+    //例子: context.getExternalFilesDir(Environment.DIRECTORY_MOVIES) 就会在/storage/emulated/0/Android/data/com.knight.cameraone/files/Movies
+    //外部路径 Android10以上Environment.getExternalStorageDirectory() 不能用
     public static String OUTPATH = Environment.getExternalStorageDirectory() + "/拍照-相册/";
 }

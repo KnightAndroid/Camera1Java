@@ -15,6 +15,38 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+
+    signingConfigs {
+        debug {
+            //   storeFile file("D:\\keystore\\debug.keystore")
+        }
+        release {
+            //这样写就得把jks文件放在项目目录
+            storeFile file('../cameraone.jks')//密钥文件路径
+            storePassword "123456"//密钥文件密码
+            keyAlias "cameraone"//key别名
+            keyPassword "123456"//key密码
+        }
+    }
+
+
+    buildTypes {
+        debug {
+            minifyEnabled false
+            shrinkResources false
+            zipAlignEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+
+        release {
+            minifyEnabled true//开启混淆
+            shrinkResources true
+            zipAlignEnabled true//去除无用资源
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+    }
 }
 
 dependencies {

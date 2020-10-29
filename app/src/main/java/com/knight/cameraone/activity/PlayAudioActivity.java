@@ -3,11 +3,10 @@ package com.knight.cameraone.activity;
 
 import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import com.knight.cameraone.Configuration;
+
 import com.knight.cameraone.R;
 
 
@@ -29,7 +28,10 @@ public class PlayAudioActivity extends AppCompatActivity implements MediaPlayer.
         player.setOnCompletionListener(this);
         player.setOnPreparedListener(this);
         //设置数据源，也就是播放文件地址，可以是网络地址
-        String dataPath = Configuration.OUTPATH + "/videomp4";
+
+
+        String dataPath = getIntent().getStringExtra("videoPath");
+    //    String dataPath = Configuration.OUTPATH + "/videomp4";
         try {
             player.setDataSource(dataPath);
 
