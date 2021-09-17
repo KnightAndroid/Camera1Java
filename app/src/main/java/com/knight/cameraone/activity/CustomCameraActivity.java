@@ -28,6 +28,7 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.request.RequestOptions;
 import com.knight.cameraone.CameraPresenter;
 import com.knight.cameraone.CircleButtonView;
+import com.knight.cameraone.Configuration;
 import com.knight.cameraone.R;
 import com.knight.cameraone.adapter.PhotosAdapter;
 import com.knight.cameraone.utils.SystemUtil;
@@ -92,7 +93,6 @@ public class CustomCameraActivity extends AppCompatActivity implements View.OnCl
     //开启人脸识别
     private boolean isFaceDetect = true;
 
-    int tempWidth, tempHeight;
     private boolean isFull = false;
 
     private ConstraintLayout cl_parent;
@@ -121,10 +121,8 @@ public class CustomCameraActivity extends AppCompatActivity implements View.OnCl
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
            supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
-        // 去掉通知栏
-     //   getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-      //          WindowManager.LayoutParams.FLAG_FULLSCREEN);//去掉信息栏
         setContentView(R.layout.activity_customcamera);
 
 
@@ -180,6 +178,7 @@ public class CustomCameraActivity extends AppCompatActivity implements View.OnCl
             case R.id.tv_flash:
                 mCameraPresenter.turnLight(isTurn);
                 tv_flash.setBackgroundResource(isTurn ? R.drawable.icon_turnon : R.drawable.icon_turnoff);
+                Configuration.flaseState = isTurn;
                 isTurn = !isTurn;
                 break;
             //开启人脸检测
@@ -197,17 +196,20 @@ public class CustomCameraActivity extends AppCompatActivity implements View.OnCl
                 if(isFull){
                     //是全屏 切换成4：3
                     layoutParams.width = (int) (screen[0]);
-                    layoutParams.height = (int) (screen[0] * 4/3);
+                    layoutParams.height = (int) (screen[0] * 16/9);
+                    tv_matchorwrap.setText("全屏模式");
                 } else {
                     //不是全屏
                     //是全屏 切换成4：3
                     layoutParams.width = (int) (screen[0]);
                     layoutParams.height = (int) (screen[1]);
+                    tv_matchorwrap.setText("半屏模式");
                 }
                 sf_camera.setLayoutParams(layoutParams);
                 isFull = !isFull;
                 mCameraPresenter.setFull(isFull);
                 cl_parent.addView(sf_camera,0,layoutParams);
+
                 break;
             default:
                 break;

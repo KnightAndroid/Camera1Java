@@ -15,7 +15,7 @@ import java.io.OutputStream;
 
 /**
  * @author created by luguian
- * @organize 车童网
+ * @organize
  * @Date 2020/9/3 19:45
  * @descript:照片处理
  */

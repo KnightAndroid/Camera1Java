@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cl_parent"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:id="@+id/cl_parent">
+    android:layout_height="match_parent">
 
 
     <SurfaceView
         android:id="@+id/sf_camera"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        app:layout_constraintDimensionRatio="9:16"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintDimensionRatio="3:4"
         app:layout_constraintTop_toTopOf="parent"
 
         />
@@ -23,64 +22,61 @@
         android:id="@+id/iv_test"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintDimensionRatio="3:4"
-        app:layout_constraintTop_toTopOf="parent"
         android:background="@drawable/test"
         android:visibility="gone"
-        />
+        app:layout_constraintDimensionRatio="3:4"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <com.knight.cameraone.view.FaceDeteView
         android:id="@+id/faceView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent" />
 
 
     <TextView
         android:id="@+id/tv_change_camera"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:layout_marginRight="15dp"
         android:layout_marginTop="15dp"
+        android:layout_marginRight="15dp"
         android:background="@drawable/icon_change_camera_selector"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        />
-
+        app:layout_constraintTop_toTopOf="parent" />
 
 
     <TextView
         android:id="@+id/tv_facedetect"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:background="@drawable/icon_facedetect_off"
-        app:layout_constraintTop_toBottomOf="@id/tv_change_camera"
-        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginTop="10dp"
         android:layout_marginRight="15dp"
-        android:layout_marginTop="10dp"/>
+        android:background="@drawable/icon_facedetect_off"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_change_camera" />
 
     <TextView
         android:id="@+id/tv_flash"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:layout_marginTop="15dp"
         android:layout_marginLeft="15dp"
-        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="15dp"
+        android:background="@drawable/icon_turnoff"
         app:layout_constraintLeft_toLeftOf="parent"
-        android:background="@drawable/icon_turnoff"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
 
     <TextView
         android:id="@+id/tv_matchorwrap"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="50dp"
         android:text="全屏模式"
-        app:layout_constraintTop_toBottomOf="@id/tv_flash"
         android:textColor="#FFFFFF"
         app:layout_constraintLeft_toLeftOf="parent"
-        android:layout_marginLeft="10dp"
-        android:layout_marginTop="10dp"
+        app:layout_constraintTop_toBottomOf="@id/tv_flash"
 
         />
 
@@ -92,8 +88,7 @@
         android:layout_marginLeft="15dp"
         android:maxHeight="120dp"
         app:layout_constraintBottom_toTopOf="@+id/cl_bottom"
-        app:layout_constraintLeft_toLeftOf="parent"
-        >
+        app:layout_constraintLeft_toLeftOf="parent">
 
     </android.support.v7.widget.RecyclerView>
 
@@ -101,8 +96,7 @@
         android:id="@+id/cl_bottom"
         android:layout_width="match_parent"
         android:layout_height="120dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        >
+        app:layout_constraintBottom_toBottomOf="parent">
 
         <!-- 拍照后显示的图片-->
         <ImageView
@@ -112,19 +106,18 @@
             android:layout_marginLeft="20dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            />
+            app:layout_constraintTop_toTopOf="parent" />
         <!-- 拍照按钮-->
         <!--<TextView-->
-            <!--android:id="@+id/tv_takephoto"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:background="@drawable/icon_take_photo_selector"-->
-            <!--app:layout_constraintBottom_toBottomOf="parent"-->
-            <!--app:layout_constraintHorizontal_bias="0.5"-->
-            <!--app:layout_constraintLeft_toLeftOf="parent"-->
-            <!--app:layout_constraintRight_toRightOf="parent"-->
-            <!--app:layout_constraintTop_toTopOf="parent"/>-->
+        <!--android:id="@+id/tv_takephoto"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:background="@drawable/icon_take_photo_selector"-->
+        <!--app:layout_constraintBottom_toBottomOf="parent"-->
+        <!--app:layout_constraintHorizontal_bias="0.5"-->
+        <!--app:layout_constraintLeft_toLeftOf="parent"-->
+        <!--app:layout_constraintRight_toRightOf="parent"-->
+        <!--app:layout_constraintTop_toTopOf="parent"/>-->
         <com.knight.cameraone.CircleButtonView
             android:id="@+id/tv_takephoto"
             android:layout_width="100dp"
@@ -133,9 +126,7 @@
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
-
-
+            app:layout_constraintTop_toTopOf="parent" />
 
 
     </android.support.constraint.ConstraintLayout>
